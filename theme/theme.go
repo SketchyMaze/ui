@@ -8,5 +8,5 @@ var (
 	ButtonHoverColor      = render.RGBA(200, 255, 255, 255)
 	ButtonOutlineColor    = render.Black
 
-	BorderColorOffset int32 = 40
+	BorderColorOffset = 40
 )
