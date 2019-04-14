@@ -68,11 +68,14 @@ func (w *Label) Compute(e render.Engine) {
 	// Max rect to encompass all lines of text.
 	var maxRect = render.Rect{}
 	for _, line := range lines {
+		if line == "" {
+			line = "<empty>"
+		}
+
 		text.Text = line // only this line at this time.
 		rect, err := e.ComputeTextRect(text)
 		if err != nil {
 			panic(fmt.Sprintf("%s: failed to compute text rect: %s", w, err)) // TODO return an error
-			return
 		}
 
 		if rect.W > maxRect.W {
