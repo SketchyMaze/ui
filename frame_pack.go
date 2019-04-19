@@ -86,12 +86,12 @@ func (w *Frame) computePacked(e render.Engine) {
 			xDirection int32 = 1
 		)
 
-		if anchor.IsSouth() { // TODO: these need tuning
+		if anchor.IsSouth() {
 			y = frameSize.H - w.BoxThickness(4)
-			yDirection = -1 * w.BoxThickness(4) // parent + child BoxThickness(1) = 2
-		} else if anchor == E {
+			yDirection = -1
+		} else if anchor.IsEast() {
 			x = frameSize.W - w.BoxThickness(4)
-			xDirection = -1 - w.BoxThickness(4) // - w.BoxThickness(2)
+			xDirection = -1
 		}
 
 		for _, packedWidget := range w.packs[anchor] {
@@ -104,8 +104,8 @@ func (w *Frame) computePacked(e render.Engine) {
 				continue
 			}
 
-			x += pack.PadX
-			y += pack.PadY
+			x += pack.PadX * xDirection
+			y += pack.PadY * yDirection
 
 			var (
 				// point = child.Point()
@@ -150,8 +150,8 @@ func (w *Frame) computePacked(e render.Engine) {
 	if len(expanded) > 0 && !frameSize.IsZero() && frameSize.Bigger(computedSize) {
 		// Divy up the size available.
 		growBy := render.Rect{
-			W: ((frameSize.W - computedSize.W) / int32(len(expanded))), // - w.BoxThickness(2),
-			H: ((frameSize.H - computedSize.H) / int32(len(expanded))), // - w.BoxThickness(2),
+			W: ((frameSize.W - computedSize.W) / int32(len(expanded))) - w.BoxThickness(4),
+			H: ((frameSize.H - computedSize.H) / int32(len(expanded))) - w.BoxThickness(4),
 		}
 		for _, pw := range expanded {
 			pw.widget.ResizeBy(growBy)

@@ -91,7 +91,7 @@ func (w *Label) Compute(e render.Engine) {
 	)
 
 	if !w.FixedSize() {
-		w.resizeAuto(render.Rect{
+		w.ResizeAuto(render.Rect{
 			W: maxRect.W + (padX * 2),
 			H: maxRect.H + (padY * 2),
 		})

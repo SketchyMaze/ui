@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"git.kirsle.net/apps/doodle/lib/render"
 	"git.kirsle.net/apps/doodle/lib/ui/theme"
 )
@@ -29,6 +31,7 @@ type Widget interface {
 	BoxSize() render.Rect // Return the full size including the border and outline.
 	Resize(render.Rect)
 	ResizeBy(render.Rect)
+	ResizeAuto(render.Rect)
 	Rect() render.Rect // Return the full absolute rect combining the Size() and Point()
 
 	Handle(Event, func(render.Point))
@@ -249,8 +252,14 @@ func (w *BaseWidget) ResizeBy(v render.Rect) {
 	w.height += v.H
 }
 
-// resizeAuto sets the size of the widget but doesn't set the fixedSize flag.
-func (w *BaseWidget) resizeAuto(v render.Rect) {
+// ResizeAuto sets the size of the widget but doesn't set the fixedSize flag.
+func (w *BaseWidget) ResizeAuto(v render.Rect) {
+	if w.ID() == "Frame<Window Body>" {
+		fmt.Printf("%s: ResizeAuto Called: %+v\n",
+			w.ID(),
+			v,
+		)
+	}
 	w.width = v.W
 	w.height = v.H
 }
