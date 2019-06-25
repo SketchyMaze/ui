@@ -21,6 +21,7 @@ func NewFrame(name string) *Frame {
 		packs:   map[Anchor][]packedWidget{},
 		widgets: []Widget{},
 	}
+	w.SetBackground(render.RGBA(1, 0, 0, 0)) // invisible default BG
 	w.IDFunc(func() string {
 		return fmt.Sprintf("Frame<%s>",
 			name,
