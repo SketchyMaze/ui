@@ -55,7 +55,7 @@ func OpenImage(e render.Engine, filename string) (*Image, error) {
 		return nil, fmt.Errorf("OpenImage: %s: not a supported image type", filename)
 	}
 
-	tex, err := e.NewBitmap(filename)
+	tex, err := e.LoadTexture(filename)
 	if err != nil {
 		return nil, err
 	}
