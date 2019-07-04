@@ -41,6 +41,13 @@ func NewImage(c Image) *Image {
 	return w
 }
 
+// ImageFromTexture creates an Image from a texture.
+func ImageFromTexture(tex render.Texturer) *Image {
+	return &Image{
+		texture: tex,
+	}
+}
+
 // OpenImage initializes an Image with a given file name.
 //
 // The file extension is important and should be a supported ImageType.
