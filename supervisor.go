@@ -173,7 +173,7 @@ func (s *Supervisor) Hovering(cursor render.Point) (hovering, outside []WidgetSl
 			}
 		)
 
-		if XY.X >= P.X && XY.X <= P2.X && XY.Y >= P.Y && XY.Y <= P2.Y {
+		if XY.X >= P.X && XY.X < P2.X && XY.Y >= P.Y && XY.Y < P2.Y {
 			// Cursor intersects the widget.
 			hovering = append(hovering, child)
 		} else {

@@ -20,6 +20,7 @@ type Label struct {
 	// Configurable fields for the constructor.
 	Text         string
 	TextVariable *string
+	IntVariable  *int
 	Font         render.Text
 
 	width      int32
@@ -32,6 +33,7 @@ func NewLabel(c Label) *Label {
 	w := &Label{
 		Text:         c.Text,
 		TextVariable: c.TextVariable,
+		IntVariable:  c.IntVariable,
 		Font:         DefaultFont,
 	}
 	if !c.Font.IsZero() {
@@ -48,6 +50,9 @@ func NewLabel(c Label) *Label {
 func (w *Label) text() render.Text {
 	if w.TextVariable != nil {
 		w.Font.Text = *w.TextVariable
+		return w.Font
+	} else if w.IntVariable != nil {
+		w.Font.Text = fmt.Sprintf("%d", *w.IntVariable)
 		return w.Font
 	}
 	w.Font.Text = w.Text
