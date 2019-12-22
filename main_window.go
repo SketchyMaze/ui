@@ -100,7 +100,7 @@ func (mw *MainWindow) Loop() error {
 		return fmt.Errorf("event poll error: %s", err)
 	}
 
-	if ev.Resized.Now {
+	if ev.WindowResized {
 		w, h := mw.engine.WindowSize()
 		if w != mw.w || h != mw.h {
 			mw.w = w

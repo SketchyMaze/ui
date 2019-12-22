@@ -4,8 +4,8 @@ import (
 	"errors"
 	"sync"
 
-	"git.kirsle.net/apps/doodle/lib/events"
 	"git.kirsle.net/apps/doodle/lib/render"
+	"git.kirsle.net/apps/doodle/lib/render/event"
 )
 
 // Event is a named event that the supervisor will send.
@@ -79,11 +79,11 @@ var (
 //
 // Useful errors returned by this may be:
 // - ErrStopPropagation
-func (s *Supervisor) Loop(ev *events.State) error {
+func (s *Supervisor) Loop(ev *event.State) error {
 	var (
 		XY = render.Point{
-			X: ev.CursorX.Now,
-			Y: ev.CursorY.Now,
+			X: int32(ev.CursorX),
+			Y: int32(ev.CursorY),
 		}
 	)
 
@@ -93,7 +93,7 @@ func (s *Supervisor) Loop(ev *events.State) error {
 	// If we are dragging something around, do not trigger any mouse events
 	// to other widgets but DO notify any widget we dropped on top of!
 	if s.dd.IsDragging() {
-		if !ev.Button1.Now && !ev.Button2.Now {
+		if !ev.Button1 && !ev.Button3 {
 			// The mouse has been released. TODO: make mouse button important?
 			for _, child := range hovering {
 				child.widget.Event(Drop, XY)
@@ -121,7 +121,7 @@ func (s *Supervisor) Loop(ev *events.State) error {
 		}
 
 		_, isClicked := s.clicked[id]
-		if ev.Button1.Now {
+		if ev.Button1 {
 			if !isClicked {
 				w.Event(MouseDown, XY)
 				s.clicked[id] = nil
