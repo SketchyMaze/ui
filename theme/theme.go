@@ -1,6 +1,6 @@
 package theme
 
-import "git.kirsle.net/apps/doodle/lib/render"
+import "git.kirsle.net/go/render"
 
 // Color schemes.
 var (

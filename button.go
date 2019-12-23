@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.kirsle.net/apps/doodle/lib/render"
+	"git.kirsle.net/go/render"
 	"git.kirsle.net/apps/doodle/lib/ui/theme"
 )
 

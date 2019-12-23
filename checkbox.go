@@ -1,6 +1,6 @@
 package ui
 
-import "git.kirsle.net/apps/doodle/lib/render"
+import "git.kirsle.net/go/render"
 
 // Checkbox combines a CheckButton with a widget like a Label.
 type Checkbox struct {

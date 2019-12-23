@@ -1,7 +1,7 @@
 package ui
 
 import (
-	"git.kirsle.net/apps/doodle/lib/render"
+	"git.kirsle.net/go/render"
 )
 
 // Pack provides configuration fields for Frame.Pack().

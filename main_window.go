@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"git.kirsle.net/apps/doodle/lib/render"
-	"git.kirsle.net/apps/doodle/lib/render/sdl"
+	"git.kirsle.net/go/render"
+	"git.kirsle.net/go/render/sdl"
 )
 
 // Target frames per second for the MainWindow to render at.

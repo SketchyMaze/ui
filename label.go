@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"git.kirsle.net/apps/doodle/lib/render"
+	"git.kirsle.net/go/render"
 )
 
 // DefaultFont is the default font settings used for a Label.

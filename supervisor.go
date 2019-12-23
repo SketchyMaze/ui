@@ -4,8 +4,8 @@ import (
 	"errors"
 	"sync"
 
-	"git.kirsle.net/apps/doodle/lib/render"
-	"git.kirsle.net/apps/doodle/lib/render/event"
+	"git.kirsle.net/go/render"
+	"git.kirsle.net/go/render/event"
 )
 
 // Event is a named event that the supervisor will send.

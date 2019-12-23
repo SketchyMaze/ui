@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	"git.kirsle.net/apps/doodle/lib/render"
+	"git.kirsle.net/go/render"
 )
 
 // Window is a frame with a title bar.
