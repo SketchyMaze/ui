@@ -82,8 +82,8 @@ var (
 func (s *Supervisor) Loop(ev *event.State) error {
 	var (
 		XY = render.Point{
-			X: int32(ev.CursorX),
-			Y: int32(ev.CursorY),
+			X: ev.CursorX,
+			Y: ev.CursorY,
 		}
 	)
 

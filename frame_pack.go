@@ -16,9 +16,9 @@ type Pack struct {
 	FillX bool
 	FillY bool
 
-	Padding int32 // Equal padding on X and Y.
-	PadX    int32
-	PadY    int32
+	Padding int // Equal padding on X and Y.
+	PadX    int
+	PadY    int
 	Expand  bool // Widget should grow its allocated space to better fill the parent.
 }
 
@@ -66,8 +66,8 @@ func (w *Frame) computePacked(e render.Engine) {
 		// was configured with an explicit Size, the Frame will be that Size,
 		// but we still calculate how much space the widgets _actually_ take
 		// so we can expand them to fill remaining space in fixed size widgets.
-		maxWidth  int32
-		maxHeight int32
+		maxWidth  int
+		maxHeight int
 		visited   = []packedWidget{}
 		expanded  = []packedWidget{}
 	)
@@ -80,10 +80,10 @@ func (w *Frame) computePacked(e render.Engine) {
 		}
 
 		var (
-			x          int32
-			y          int32
-			yDirection int32 = 1
-			xDirection int32 = 1
+			x          int
+			y          int
+			yDirection int = 1
+			xDirection int = 1
 		)
 
 		if anchor.IsSouth() {
@@ -150,8 +150,8 @@ func (w *Frame) computePacked(e render.Engine) {
 	if len(expanded) > 0 && !frameSize.IsZero() && frameSize.Bigger(computedSize) {
 		// Divy up the size available.
 		growBy := render.Rect{
-			W: ((frameSize.W - computedSize.W) / int32(len(expanded))) - w.BoxThickness(4),
-			H: ((frameSize.H - computedSize.H) / int32(len(expanded))) - w.BoxThickness(4),
+			W: ((frameSize.W - computedSize.W) / len(expanded)) - w.BoxThickness(4),
+			H: ((frameSize.H - computedSize.H) / len(expanded)) - w.BoxThickness(4),
 		}
 		for _, pw := range expanded {
 			pw.widget.ResizeBy(growBy)

@@ -23,8 +23,8 @@ type Label struct {
 	IntVariable  *int
 	Font         render.Text
 
-	width      int32
-	height     int32
+	width      int
+	height     int
 	lineHeight int
 }
 
@@ -127,7 +127,7 @@ func (w *Label) Present(e render.Engine, P render.Point) {
 		text.Text = line
 		e.DrawText(text, render.Point{
 			X: P.X + border + padX,
-			Y: P.Y + border + padY + int32(i*w.lineHeight),
+			Y: P.Y + border + padY + (i * w.lineHeight),
 		})
 	}
 }

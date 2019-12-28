@@ -101,7 +101,7 @@ func (w *Button) Present(e render.Engine, P render.Point) {
 	w.DrawBox(e, P)
 
 	// Offset further if we are currently sunken.
-	var clickOffset int32
+	var clickOffset int
 	if w.clicked {
 		clickOffset++
 	}

@@ -67,8 +67,8 @@ func (mw *MainWindow) Pack(w Widget, pack Pack) {
 // resized handles the window being resized.
 func (mw *MainWindow) resized() {
 	mw.frame.Resize(render.Rect{
-		W: int32(mw.w),
-		H: int32(mw.h),
+		W: mw.w,
+		H: mw.h,
 	})
 }
 

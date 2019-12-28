@@ -38,12 +38,12 @@ type Widget interface {
 	Event(Event, render.Point) // called internally to trigger an event
 
 	// Thickness of the padding + border + outline.
-	BoxThickness(multiplier int32) int32
+	BoxThickness(multiplier int) int
 	DrawBox(render.Engine, render.Point)
 
 	// Widget configuration getters.
-	Margin() int32                // Margin away from other widgets
-	SetMargin(int32)              //
+	Margin() int                  // Margin away from other widgets
+	SetMargin(int)                //
 	Background() render.Color     // Background color
 	SetBackground(render.Color)   //
 	Foreground() render.Color     // Foreground color
@@ -52,12 +52,12 @@ type Widget interface {
 	SetBorderStyle(BorderStyle)   //
 	BorderColor() render.Color    // Border color (default is Background)
 	SetBorderColor(render.Color)  //
-	BorderSize() int32            // Border size (default 0)
-	SetBorderSize(int32)          //
+	BorderSize() int              // Border size (default 0)
+	SetBorderSize(int)            //
 	OutlineColor() render.Color   // Outline color (default Invisible)
 	SetOutlineColor(render.Color) //
-	OutlineSize() int32           // Outline size (default 0)
-	SetOutlineSize(int32)         //
+	OutlineSize() int             // Outline size (default 0)
+	SetOutlineSize(int)           //
 
 	// Visibility
 	Hide()
@@ -87,17 +87,17 @@ type Config struct {
 	// keeping the auto-resize property, pass AutoResize=true too. This is
 	// mainly used internally when widgets are calculating their automatic sizes.
 	AutoResize   bool
-	Width        int32
-	Height       int32
-	Margin       int32
-	MarginX      int32
-	MarginY      int32
+	Width        int
+	Height       int
+	Margin       int
+	MarginX      int
+	MarginY      int
 	Background   render.Color
 	Foreground   render.Color
-	BorderSize   int32
+	BorderSize   int
 	BorderStyle  BorderStyle
 	BorderColor  render.Color
-	OutlineSize  int32
+	OutlineSize  int
 	OutlineColor render.Color
 }
 
@@ -108,17 +108,17 @@ type BaseWidget struct {
 	idFunc       func() string
 	fixedSize    bool
 	hidden       bool
-	width        int32
-	height       int32
+	width        int
+	height       int
 	point        render.Point
-	margin       int32
+	margin       int
 	background   render.Color
 	foreground   render.Color
 	borderStyle  BorderStyle
 	borderColor  render.Color
-	borderSize   int32
+	borderSize   int
 	outlineColor render.Color
-	outlineSize  int32
+	outlineSize  int
 	handlers     map[Event][]func(render.Point)
 	hasParent    bool
 	parent       Widget
@@ -266,7 +266,7 @@ func (w *BaseWidget) ResizeAuto(v render.Rect) {
 
 // BoxThickness returns the full sum of the padding, border and outline.
 // m = multiplier, i.e., 1 or 2
-func (w *BaseWidget) BoxThickness(m int32) int32 {
+func (w *BaseWidget) BoxThickness(m int) int {
 	if m == 0 {
 		m = 1
 	}
@@ -396,12 +396,12 @@ func (w *BaseWidget) DrawBox(e render.Engine, P render.Point) {
 }
 
 // Margin returns the margin width.
-func (w *BaseWidget) Margin() int32 {
+func (w *BaseWidget) Margin() int {
 	return w.margin
 }
 
 // SetMargin sets the margin width.
-func (w *BaseWidget) SetMargin(v int32) {
+func (w *BaseWidget) SetMargin(v int) {
 	w.margin = v
 }
 
@@ -449,12 +449,12 @@ func (w *BaseWidget) SetBorderColor(c render.Color) {
 }
 
 // BorderSize returns the border thickness.
-func (w *BaseWidget) BorderSize() int32 {
+func (w *BaseWidget) BorderSize() int {
 	return w.borderSize
 }
 
 // SetBorderSize sets the border thickness.
-func (w *BaseWidget) SetBorderSize(v int32) {
+func (w *BaseWidget) SetBorderSize(v int) {
 	w.borderSize = v
 }
 
@@ -469,12 +469,12 @@ func (w *BaseWidget) SetOutlineColor(c render.Color) {
 }
 
 // OutlineSize returns the outline thickness.
-func (w *BaseWidget) OutlineSize() int32 {
+func (w *BaseWidget) OutlineSize() int {
 	return w.outlineSize
 }
 
 // SetOutlineSize sets the outline thickness.
-func (w *BaseWidget) SetOutlineSize(v int32) {
+func (w *BaseWidget) SetOutlineSize(v int) {
 	w.outlineSize = v
 }
 
