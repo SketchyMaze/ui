@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"git.kirsle.net/go/render"
-	"git.kirsle.net/apps/doodle/lib/ui/theme"
+	"git.kirsle.net/go/ui/theme"
 )
 
 // BorderStyle options for widget.SetBorderStyle()

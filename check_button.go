@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"git.kirsle.net/go/render"
-	"git.kirsle.net/apps/doodle/lib/ui/theme"
+	"git.kirsle.net/go/ui/theme"
 )
 
 // CheckButton implements a checkbox and radiobox widget. It's based on a
