@@ -1,5 +1,7 @@
 # ui: User Interface Toolkit for Go
 
+[![GoDoc](https://godoc.org/git.kirsle.net/go/ui?status.svg)](https://godoc.org/git.kirsle.net/go/ui)
+
 Package ui is a user interface toolkit for Go that targets desktop
 applications (SDL2, for Linux, MacOS and Windows) as well as web browsers
 (WebAssembly rendering to an HTML Canvas).
