@@ -17,7 +17,7 @@ var (
 
 // MainWindow is the parent window of a UI application.
 type MainWindow struct {
-	engine     render.Engine
+	Engine     render.Engine
 	supervisor *Supervisor
 	frame      *Frame
 	w          int
@@ -33,12 +33,12 @@ func NewMainWindow(title string) (*MainWindow, error) {
 		supervisor: NewSupervisor(),
 	}
 
-	mw.engine = sdl.New(
+	mw.Engine = sdl.New(
 		title,
 		mw.w,
 		mw.h,
 	)
-	if err := mw.engine.Setup(); err != nil {
+	if err := mw.Engine.Setup(); err != nil {
 		return nil, err
 	}
 
@@ -72,9 +72,14 @@ func (mw *MainWindow) resized() {
 	})
 }
 
+// SetBackground changes the window's frame's background color.
+func (mw *MainWindow) SetBackground(color render.Color) {
+	mw.frame.SetBackground(color)
+}
+
 // Present the window.
 func (mw *MainWindow) Present() {
-	mw.supervisor.Present(mw.engine)
+	mw.supervisor.Present(mw.Engine)
 }
 
 // MainLoop starts the main event loop and blocks until there's an error.
@@ -89,19 +94,19 @@ func (mw *MainWindow) MainLoop() error {
 
 // Loop does one loop of the UI.
 func (mw *MainWindow) Loop() error {
-	mw.engine.Clear(render.White)
+	mw.Engine.Clear(render.White)
 
 	// Record how long this loop took.
 	start := time.Now()
 
 	// Poll for events.
-	ev, err := mw.engine.Poll()
+	ev, err := mw.Engine.Poll()
 	if err != nil {
 		return fmt.Errorf("event poll error: %s", err)
 	}
 
 	if ev.WindowResized {
-		w, h := mw.engine.WindowSize()
+		w, h := mw.Engine.WindowSize()
 		if w != mw.w || h != mw.h {
 			mw.w = w
 			mw.h = h
@@ -109,11 +114,12 @@ func (mw *MainWindow) Loop() error {
 		}
 	}
 
-	mw.frame.Compute(mw.engine)
+	mw.frame.Compute(mw.Engine)
 
 	// Render the child widgets.
-	mw.supervisor.Present(mw.engine)
-	mw.engine.Present()
+	mw.supervisor.Loop(ev)
+	mw.supervisor.Present(mw.Engine)
+	mw.Engine.Present()
 
 	// Delay to maintain target frames per second.
 	var delay uint32
@@ -122,7 +128,7 @@ func (mw *MainWindow) Loop() error {
 	if targetFPS-int(elapsed) > 0 {
 		delay = uint32(targetFPS - int(elapsed))
 	}
-	mw.engine.Delay(delay)
+	mw.Engine.Delay(delay)
 
 	return nil
 }

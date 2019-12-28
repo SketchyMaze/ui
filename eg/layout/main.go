@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"git.kirsle.net/apps/doodle/lib/ui/eg/layout"
+	"git.kirsle.net/go/ui/eg/layout"
 )
 
 func main() {
