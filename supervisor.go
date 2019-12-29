@@ -2,6 +2,7 @@ package ui
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 
 	"git.kirsle.net/go/render"
@@ -165,7 +166,7 @@ func (s *Supervisor) Hovering(cursor render.Point) (hovering, outside []WidgetSl
 	for child := range s.Widgets() {
 		var (
 			w  = child.widget
-			P  = w.Point()
+			P  = AbsolutePosition(w)
 			S  = w.Size()
 			P2 = render.Point{
 				X: P.X + S.W,
@@ -204,10 +205,11 @@ func (s *Supervisor) Present(e render.Engine) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	for child := range s.Widgets() {
-		var w = child.widget
-		w.Present(e, w.Point())
-	}
+	fmt.Println("!!! ui.Supervisor.Present() is deprecated")
+	// for child := range s.Widgets() {
+	// 	var w = child.widget
+	// 	w.Present(e, w.Point())
+	// }
 }
 
 // Add a widget to be supervised.

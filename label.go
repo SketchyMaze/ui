@@ -101,11 +101,6 @@ func (w *Label) Compute(e render.Engine) {
 			H: maxRect.H + (padY * 2),
 		})
 	}
-
-	w.MoveTo(render.Point{
-		X: maxRect.X + w.BoxThickness(1),
-		Y: maxRect.Y + w.BoxThickness(1),
-	})
 }
 
 // Present the label widget.

@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"fmt"
-
 	"git.kirsle.net/go/render"
 	"git.kirsle.net/go/ui/theme"
 )
@@ -67,8 +65,8 @@ type Widget interface {
 	// Container widgets like Frames can wire up associations between the
 	// child widgets and the parent.
 	Parent() (parent Widget, ok bool)
-	Adopt(parent Widget) // for the container to assign itself the parent
-	Children() []Widget  // for containers to return their children
+	SetParent(parent Widget) // for the container to assign itself the parent
+	Children() []Widget      // for containers to return their children
 
 	// Run any render computations; by the end the widget must know its
 	// Width and Height. For example the Label widget will render itself onto
@@ -254,18 +252,13 @@ func (w *BaseWidget) ResizeBy(v render.Rect) {
 
 // ResizeAuto sets the size of the widget but doesn't set the fixedSize flag.
 func (w *BaseWidget) ResizeAuto(v render.Rect) {
-	if w.ID() == "Frame<Window Body>" {
-		fmt.Printf("%s: ResizeAuto Called: %+v\n",
-			w.ID(),
-			v,
-		)
-	}
 	w.width = v.W
 	w.height = v.H
 }
 
 // BoxThickness returns the full sum of the padding, border and outline.
-// m = multiplier, i.e., 1 or 2
+// m = multiplier, i.e., 1 or 2. If m=1 this returns the box thickness of one
+// edge of the widget, if m=2 it would account for both edges of the widget.
 func (w *BaseWidget) BoxThickness(m int) int {
 	if m == 0 {
 		m = 1
@@ -279,10 +272,10 @@ func (w *BaseWidget) Parent() (Widget, bool) {
 	return w.parent, w.hasParent
 }
 
-// Adopt sets the widget's parent. This function is called by container
+// SetParent sets the widget's parent. This function is called by container
 // widgets like Frame when they add a child widget to their care.
 // Pass a nil parent to unset the parent.
-func (w *BaseWidget) Adopt(parent Widget) {
+func (w *BaseWidget) SetParent(parent Widget) {
 	if parent == nil {
 		w.hasParent = false
 		w.parent = nil

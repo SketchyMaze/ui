@@ -66,6 +66,9 @@ func NewWindow(title string) *Window {
 	})
 	w.content = content
 
+	// Set up parent/child relationships
+	w.body.SetParent(w)
+
 	return w
 }
 

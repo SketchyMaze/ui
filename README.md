@@ -11,8 +11,8 @@ applications (SDL2, for Linux, MacOS and Windows) as well as web browsers
 > _(Screenshot is from Project: Doodle's GUITest debug screen showing a_
 > _Window, several Frames, Labels, Buttons and a Checkbox widget.)_
 
-It is very much a **work in progress** and it's a bit buggy. See the
-[Known Issues](#known-issues) at the bottom of this document.
+It is very much a **work in progress** and may contain bugs and its API may
+change as bugs are fixed or features added.
 
 This library is being developed in conjunction with my drawing-based maze
 game, [Project: Doodle](https://www.kirsle.net/doodle). The rendering engine
@@ -213,24 +213,6 @@ window the same as you would a Frame.
 MainWindow includes its own Supervisor: just call the `.Add(Widget)`
 method to add interactive widgets to the supervisor. The MainLoop() of the
 window calls Supervisor.Loop() automatically.
-
-# Known Issues
-
-The frame packing algorithm (frame_pack.go) is currently very buggy and in
-need of a re-write. Some examples of issues with it:
-
-* Currently, when the Frame is iterating over packed widgets to decide their
-  location and size, it explicitly calls MoveTo() and Resize() giving them
-  their pixel-coordinates, relative to the Frame's own position.
-  * When Frames nest other Frames this becomes more of an issue.
-  * The Supervisor sometimes can't determine the correct position of a
-    button packed inside of nested frames. It currently checks the
-    Point() of the button (set by its parent Frame) and this doesn't
-    account for the grandparent frame's position. Using the
-    AbsolutePosition() helper function (which recursively crawls up a
-    widget tree) also yields incorrect results, as the position of each
-    Frame is _added_ to the position of the Button which throws it off even
-    further.
 
 # License
 

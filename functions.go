@@ -1,6 +1,8 @@
 package ui
 
-import "git.kirsle.net/go/render"
+import (
+	"git.kirsle.net/go/render"
+)
 
 // AbsolutePosition computes a widget's absolute X,Y position on the
 // window on screen by crawling its parent widget tree.

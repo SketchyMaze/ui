@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"git.kirsle.net/go/render"
+	"git.kirsle.net/go/render/event"
 	"git.kirsle.net/go/render/sdl"
 )
 
@@ -17,20 +18,22 @@ var (
 
 // MainWindow is the parent window of a UI application.
 type MainWindow struct {
-	Engine     render.Engine
-	supervisor *Supervisor
-	frame      *Frame
-	w          int
-	h          int
+	Engine        render.Engine
+	supervisor    *Supervisor
+	frame         *Frame
+	loopCallbacks []func(*event.State)
+	w             int
+	h             int
 }
 
 // NewMainWindow initializes the MainWindow. You should probably only have one
 // of these per application.
 func NewMainWindow(title string) (*MainWindow, error) {
 	mw := &MainWindow{
-		w:          800,
-		h:          600,
-		supervisor: NewSupervisor(),
+		w:             800,
+		h:             600,
+		supervisor:    NewSupervisor(),
+		loopCallbacks: []func(*event.State){},
 	}
 
 	mw.Engine = sdl.New(
@@ -64,6 +67,11 @@ func (mw *MainWindow) Pack(w Widget, pack Pack) {
 	mw.frame.Pack(w, pack)
 }
 
+// Frame returns the window's main frame, if needed.
+func (mw *MainWindow) Frame() *Frame {
+	return mw.frame
+}
+
 // resized handles the window being resized.
 func (mw *MainWindow) resized() {
 	mw.frame.Resize(render.Rect{
@@ -80,6 +88,14 @@ func (mw *MainWindow) SetBackground(color render.Color) {
 // Present the window.
 func (mw *MainWindow) Present() {
 	mw.supervisor.Present(mw.Engine)
+}
+
+// OnLoop registers a function to be called on every loop of the main window.
+// This enables your application to register global event handlers or whatnot.
+// The function is called between the event polling and the updating of any UI
+// elements.
+func (mw *MainWindow) OnLoop(callback func(*event.State)) {
+	mw.loopCallbacks = append(mw.loopCallbacks, callback)
 }
 
 // MainLoop starts the main event loop and blocks until there's an error.
@@ -114,11 +130,16 @@ func (mw *MainWindow) Loop() error {
 		}
 	}
 
+	// Ping any loop callbacks.
+	for _, cb := range mw.loopCallbacks {
+		cb(ev)
+	}
+
 	mw.frame.Compute(mw.Engine)
 
 	// Render the child widgets.
 	mw.supervisor.Loop(ev)
-	mw.supervisor.Present(mw.Engine)
+	mw.frame.Present(mw.Engine, mw.frame.Point())
 	mw.Engine.Present()
 
 	// Delay to maintain target frames per second.

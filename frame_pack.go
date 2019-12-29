@@ -47,7 +47,7 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 	}
 
 	// Adopt the child widget so it can access the Frame.
-	child.Adopt(w)
+	child.SetParent(w)
 
 	w.packs[C.Side] = append(w.packs[C.Side], packedWidget{
 		widget: child,
@@ -65,7 +65,7 @@ func (w *Frame) computePacked(e render.Engine) {
 		// that the Frame must be to contain all of its children. If the Frame
 		// was configured with an explicit Size, the Frame will be that Size,
 		// but we still calculate how much space the widgets _actually_ take
-		// so we can expand them to fill remaining space in fixed size widgets.
+		// so we can expand them to fill remaining space in fixed size Frames.
 		maxWidth  int
 		maxHeight int
 		visited   = []packedWidget{}
@@ -82,8 +82,8 @@ func (w *Frame) computePacked(e render.Engine) {
 		var (
 			x          int
 			y          int
-			yDirection int = 1
-			xDirection int = 1
+			yDirection = 1
+			xDirection = 1
 		)
 
 		if side.IsSouth() {
@@ -128,12 +128,15 @@ func (w *Frame) computePacked(e render.Engine) {
 				x -= size.W - pack.PadX
 			}
 
+			// NOTE: we place the child's position relative to the Frame's
+			// position. So a child placed at the top/left of the Frame gets
+			// an x,y near zero regardless of the Frame's position.
 			child.MoveTo(render.NewPoint(x, y))
 
 			if side.IsNorth() {
 				y += size.H + pack.PadY
 			}
-			if side == W {
+			if side.IsWest() {
 				x += size.W + pack.PadX
 			}
 
@@ -147,14 +150,20 @@ func (w *Frame) computePacked(e render.Engine) {
 	// If we have extra space in the Frame and any expanding widgets, let the
 	// expanding widgets grow and share the remaining space.
 	computedSize := render.NewRect(maxWidth, maxHeight)
-	if len(expanded) > 0 && !frameSize.IsZero() && frameSize.Bigger(computedSize) {
+	if len(expanded) > 0 && !frameSize.IsZero() { // && frameSize.Bigger(computedSize) {
 		// Divy up the size available.
 		growBy := render.Rect{
 			W: ((frameSize.W - computedSize.W) / len(expanded)) - w.BoxThickness(4),
 			H: ((frameSize.H - computedSize.H) / len(expanded)) - w.BoxThickness(4),
 		}
 		for _, pw := range expanded {
-			pw.widget.ResizeBy(growBy)
+			// Grow the widget but maintain its auto-size flag, in case the widget
+			// was not given an explicit size before.
+			size := pw.widget.Size()
+			pw.widget.ResizeAuto(render.Rect{
+				W: size.W + growBy.W,
+				H: size.H + growBy.H,
+			})
 			pw.widget.Compute(e)
 		}
 	}
@@ -190,10 +199,16 @@ func (w *Frame) computePacked(e render.Engine) {
 		)
 
 		if pack.Side.IsNorth() || pack.Side.IsSouth() {
+			// Aligned to the top or bottom. If the widget Fills horizontally,
+			// resize it so its Width matches the frame's Width.
 			if pack.FillX && resize.W < innerFrameSize.W {
-				resize.W = innerFrameSize.W - w.BoxThickness(2)
+				resize.W = innerFrameSize.W - w.BoxThickness(2) // TODO: child.BoxThickness instead??
 				resized = true
 			}
+
+			// If it does not Fill horizontally and there is extra horizontal
+			// space, center the widget inside the space. TODO: Anchor option
+			// could align the widget to the left or right instead of center.
 			if resize.W < innerFrameSize.W-w.BoxThickness(4) {
 				if pack.Side.IsCenter() {
 					point.X = (innerFrameSize.W / 2) - (resize.W / 2)
@@ -206,19 +221,19 @@ func (w *Frame) computePacked(e render.Engine) {
 				moved = true
 			}
 		} else if pack.Side.IsWest() || pack.Side.IsEast() {
+			// Similar logic to the above, but widget is packed against the
+			// left or right edge. Handle vertical Fill to grow the widget.
 			if pack.FillY && resize.H < innerFrameSize.H {
-				resize.H = innerFrameSize.H - w.BoxThickness(2) // BoxThickness(2) for parent + child
-				// point.Y -= (w.BoxThickness(4) + child.BoxThickness(2))
-				moved = true
+				resize.H = innerFrameSize.H - w.BoxThickness(2) // TODO: child.BoxThickness instead??
 				resized = true
 			}
 
 			// Vertically align the widgets.
 			if resize.H < innerFrameSize.H {
 				if pack.Side.IsMiddle() {
-					point.Y = (innerFrameSize.H / 2) - (resize.H / 2) - w.BoxThickness(1)
+					point.Y = (innerFrameSize.H / 2) - (resize.H / 2) // - w.BoxThickness(1)
 				} else if pack.Side.IsNorth() {
-					point.Y = pack.PadY - w.BoxThickness(4)
+					point.Y = pack.PadY // - w.BoxThickness(4)
 				} else if pack.Side.IsSouth() {
 					point.Y = innerFrameSize.H - resize.H - pack.PadY
 				}
@@ -229,7 +244,7 @@ func (w *Frame) computePacked(e render.Engine) {
 		}
 
 		if resized && size != resize {
-			child.Resize(resize)
+			child.ResizeAuto(resize)
 			child.Compute(e)
 		}
 		if moved {
@@ -237,6 +252,9 @@ func (w *Frame) computePacked(e render.Engine) {
 		}
 	}
 
+	// TODO: the Frame should ResizeAuto so it doesn't mark fixedSize=true.
+	// Currently there's a bug where frames will grow when the window grows but
+	// never shrink again when the window shrinks.
 	// if !w.FixedSize() {
 	w.Resize(render.NewRect(
 		frameSize.W-w.BoxThickness(2),
