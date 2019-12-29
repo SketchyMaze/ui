@@ -53,7 +53,7 @@ func (w *Menu) AddItem(label string, command func()) *MenuItem {
 // Pack a menu item onto the menu.
 func (w *Menu) Pack(item *MenuItem) {
 	w.body.Pack(item, Pack{
-		Anchor: NE,
+		Side: NE,
 		// Expand: true,
 		// Padding: 8,
 		FillX: true,

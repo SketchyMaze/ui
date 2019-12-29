@@ -8,7 +8,7 @@ import (
 type Pack struct {
 	// Side of the parent to anchor the position to, like N, SE, W. Default
 	// is Center.
-	Anchor Anchor
+	Side Side
 
 	// If the widget is smaller than its allocated space, grow the widget
 	// to fill its space in the Frame.
@@ -29,9 +29,9 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 		C = config[0]
 	}
 
-	// Initialize the pack list for this anchor?
-	if _, ok := w.packs[C.Anchor]; !ok {
-		w.packs[C.Anchor] = []packedWidget{}
+	// Initialize the pack list for this side?
+	if _, ok := w.packs[C.Side]; !ok {
+		w.packs[C.Side] = []packedWidget{}
 	}
 
 	// Padding: if the user only provided Padding add it to both
@@ -49,7 +49,7 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 	// Adopt the child widget so it can access the Frame.
 	child.Adopt(w)
 
-	w.packs[C.Anchor] = append(w.packs[C.Anchor], packedWidget{
+	w.packs[C.Side] = append(w.packs[C.Side], packedWidget{
 		widget: child,
 		pack:   C,
 	})
@@ -72,10 +72,10 @@ func (w *Frame) computePacked(e render.Engine) {
 		expanded  = []packedWidget{}
 	)
 
-	// Iterate through all anchored directions and compute how much space to
+	// Iterate through all directions and compute how much space to
 	// reserve to contain all of their widgets.
-	for anchor := AnchorMin; anchor <= AnchorMax; anchor++ {
-		if _, ok := w.packs[anchor]; !ok {
+	for side := SideMin; side <= SideMax; side++ {
+		if _, ok := w.packs[side]; !ok {
 			continue
 		}
 
@@ -86,15 +86,15 @@ func (w *Frame) computePacked(e render.Engine) {
 			xDirection int = 1
 		)
 
-		if anchor.IsSouth() {
+		if side.IsSouth() {
 			y = frameSize.H - w.BoxThickness(4)
 			yDirection = -1
-		} else if anchor.IsEast() {
+		} else if side.IsEast() {
 			x = frameSize.W - w.BoxThickness(4)
 			xDirection = -1
 		}
 
-		for _, packedWidget := range w.packs[anchor] {
+		for _, packedWidget := range w.packs[side] {
 
 			child := packedWidget.widget
 			pack := packedWidget.pack
@@ -121,19 +121,19 @@ func (w *Frame) computePacked(e render.Engine) {
 				maxHeight = yStep + size.H + (pack.PadY * 2)
 			}
 
-			if anchor.IsSouth() {
+			if side.IsSouth() {
 				y -= size.H - pack.PadY
 			}
-			if anchor.IsEast() {
+			if side.IsEast() {
 				x -= size.W - pack.PadX
 			}
 
 			child.MoveTo(render.NewPoint(x, y))
 
-			if anchor.IsNorth() {
+			if side.IsNorth() {
 				y += size.H + pack.PadY
 			}
-			if anchor == W {
+			if side == W {
 				x += size.W + pack.PadX
 			}
 
@@ -172,7 +172,7 @@ func (w *Frame) computePacked(e render.Engine) {
 		}
 	}
 
-	// Rescan all the widgets in this anchor to re-center them
+	// Rescan all the widgets in this side to re-center them
 	// in their space.
 	innerFrameSize := render.NewRect(
 		frameSize.W-w.BoxThickness(2),
@@ -189,23 +189,23 @@ func (w *Frame) computePacked(e render.Engine) {
 			moved   bool
 		)
 
-		if pack.Anchor.IsNorth() || pack.Anchor.IsSouth() {
+		if pack.Side.IsNorth() || pack.Side.IsSouth() {
 			if pack.FillX && resize.W < innerFrameSize.W {
 				resize.W = innerFrameSize.W - w.BoxThickness(2)
 				resized = true
 			}
 			if resize.W < innerFrameSize.W-w.BoxThickness(4) {
-				if pack.Anchor.IsCenter() {
+				if pack.Side.IsCenter() {
 					point.X = (innerFrameSize.W / 2) - (resize.W / 2)
-				} else if pack.Anchor.IsWest() {
+				} else if pack.Side.IsWest() {
 					point.X = pack.PadX
-				} else if pack.Anchor.IsEast() {
+				} else if pack.Side.IsEast() {
 					point.X = innerFrameSize.W - resize.W - pack.PadX
 				}
 
 				moved = true
 			}
-		} else if pack.Anchor.IsWest() || pack.Anchor.IsEast() {
+		} else if pack.Side.IsWest() || pack.Side.IsEast() {
 			if pack.FillY && resize.H < innerFrameSize.H {
 				resize.H = innerFrameSize.H - w.BoxThickness(2) // BoxThickness(2) for parent + child
 				// point.Y -= (w.BoxThickness(4) + child.BoxThickness(2))
@@ -215,17 +215,17 @@ func (w *Frame) computePacked(e render.Engine) {
 
 			// Vertically align the widgets.
 			if resize.H < innerFrameSize.H {
-				if pack.Anchor.IsMiddle() {
+				if pack.Side.IsMiddle() {
 					point.Y = (innerFrameSize.H / 2) - (resize.H / 2) - w.BoxThickness(1)
-				} else if pack.Anchor.IsNorth() {
+				} else if pack.Side.IsNorth() {
 					point.Y = pack.PadY - w.BoxThickness(4)
-				} else if pack.Anchor.IsSouth() {
+				} else if pack.Side.IsSouth() {
 					point.Y = innerFrameSize.H - resize.H - pack.PadY
 				}
 				moved = true
 			}
 		} else {
-			panic("unsupported pack.Anchor")
+			panic("unsupported pack.Side")
 		}
 
 		if resized && size != resize {
@@ -245,12 +245,12 @@ func (w *Frame) computePacked(e render.Engine) {
 	// }
 }
 
-// Anchor is a cardinal direction.
-type Anchor uint8
+// Side is a cardinal direction.
+type Side uint8
 
-// Anchor values.
+// Side values.
 const (
-	Center Anchor = iota
+	Center Side = iota
 	N
 	NE
 	E
@@ -261,41 +261,41 @@ const (
 	NW
 )
 
-// Range of Anchor values.
+// Range of Side values.
 const (
-	AnchorMin = Center
-	AnchorMax = NW
+	SideMin = Center
+	SideMax = NW
 )
 
-// IsNorth returns if the anchor is N, NE or NW.
-func (a Anchor) IsNorth() bool {
+// IsNorth returns if the side is N, NE or NW.
+func (a Side) IsNorth() bool {
 	return a == N || a == NE || a == NW
 }
 
-// IsSouth returns if the anchor is S, SE or SW.
-func (a Anchor) IsSouth() bool {
+// IsSouth returns if the side is S, SE or SW.
+func (a Side) IsSouth() bool {
 	return a == S || a == SE || a == SW
 }
 
-// IsEast returns if the anchor is E, NE or SE.
-func (a Anchor) IsEast() bool {
+// IsEast returns if the side is E, NE or SE.
+func (a Side) IsEast() bool {
 	return a == E || a == NE || a == SE
 }
 
-// IsWest returns if the anchor is W, NW or SW.
-func (a Anchor) IsWest() bool {
+// IsWest returns if the side is W, NW or SW.
+func (a Side) IsWest() bool {
 	return a == W || a == NW || a == SW
 }
 
-// IsCenter returns if the anchor is Center, N or S, to determine
-// whether to align text as centered for North/South anchors.
-func (a Anchor) IsCenter() bool {
+// IsCenter returns if the side is Center, N or S, to determine
+// whether to align text as centered for North/South sides.
+func (a Side) IsCenter() bool {
 	return a == Center || a == N || a == S
 }
 
-// IsMiddle returns if the anchor is Center, E or W, to determine
-// whether to align text as middled for East/West anchors.
-func (a Anchor) IsMiddle() bool {
+// IsMiddle returns if the side is Center, E or W, to determine
+// whether to align text as middled for East/West sides.
+func (a Side) IsMiddle() bool {
 	return a == Center || a == W || a == E
 }
 

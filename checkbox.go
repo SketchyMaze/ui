@@ -44,10 +44,10 @@ func makeCheckbox(name string, boolVar *bool, stringVar *string, value string, c
 	}
 
 	w.Pack(w.button, Pack{
-		Anchor: W,
+		Side: W,
 	})
 	w.Pack(w.child, Pack{
-		Anchor: W,
+		Side: W,
 	})
 
 	return w

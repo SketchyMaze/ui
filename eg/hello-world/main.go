@@ -26,8 +26,8 @@ func main() {
 		},
 	})
 	mw.Pack(label, ui.Pack{
-		Anchor: ui.N,
-		PadY:   12,
+		Side: ui.N,
+		PadY: 12,
 	})
 
 	// Draw a button.
@@ -44,7 +44,7 @@ func main() {
 		fmt.Println("I've been clicked!")
 	})
 	mw.Pack(button, ui.Pack{
-		Anchor: ui.N,
+		Side: ui.N,
 	})
 
 	// Add the button to the MainWindow's Supervisor so it can be

@@ -50,8 +50,8 @@ func NewWindow(title string) *Window {
 		Background: render.Blue,
 	})
 	w.body.Pack(titleBar, Pack{
-		Anchor: N,
-		Fill:   true,
+		Side: N,
+		Fill: true,
 	})
 	w.titleBar = titleBar
 
@@ -61,8 +61,8 @@ func NewWindow(title string) *Window {
 		Background: render.Grey,
 	})
 	w.body.Pack(content, Pack{
-		Anchor: N,
-		Fill:   true,
+		Side: N,
+		Fill: true,
 	})
 	w.content = content
 

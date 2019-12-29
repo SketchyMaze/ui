@@ -56,7 +56,7 @@ func main() {
         },
     })
     mw.Pack(label, ui.Pack{
-        Anchor: ui.N,
+        Side: ui.N,
         PadY:   12,
     })
 
@@ -74,7 +74,7 @@ func main() {
         fmt.Println("I've been clicked!")
     })
     mw.Pack(button, ui.Pack{
-        Anchor: ui.N,
+        Side: ui.N,
     })
 
     // Add the button to the MainWindow's Supervisor so it can be
@@ -231,12 +231,6 @@ need of a re-write. Some examples of issues with it:
     widget tree) also yields incorrect results, as the position of each
     Frame is _added_ to the position of the Button which throws it off even
     further.
-
-It's on my to-do list to rewrite the algorithm from scratch and make it
-more resilient. One thing I also want to do is rename the `Anchor` field
-and call it `Side` to be more in line with the Tk GUI toolkit's naming
-convention. ("Side: N" or "Side: SE", and let the "Anchor" name be used for
-how to center the widget inside of its space ("Top", "Center", "Left", etc.)
 
 # License
 

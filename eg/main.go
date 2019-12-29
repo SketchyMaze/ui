@@ -21,8 +21,8 @@ func main() {
 		Background:  render.Grey,
 	})
 	mw.Pack(leftFrame, ui.Pack{
-		Anchor: ui.W,
-		FillY:  true,
+		Side:  ui.W,
+		FillY: true,
 	})
 
 	mainFrame := ui.NewFrame("Main Frame")
@@ -30,7 +30,7 @@ func main() {
 		Background: render.RGBA(255, 255, 255, 180),
 	})
 	mw.Pack(mainFrame, ui.Pack{
-		Anchor: ui.W,
+		Side:   ui.W,
 		Expand: true,
 		PadX:   10,
 	})
@@ -39,8 +39,8 @@ func main() {
 		Text: "Hello world",
 	})
 	leftFrame.Pack(label, ui.Pack{
-		Anchor: ui.N,
-		PadY:   12,
+		Side: ui.N,
+		PadY: 12,
 	})
 
 	// Draw some buttons in the left frame.
@@ -59,17 +59,17 @@ func main() {
 		mw.Add(btn)
 
 		leftFrame.Pack(btn, ui.Pack{
-			Anchor: ui.N,
-			FillX:  true,
-			PadY:   2,
+			Side:  ui.N,
+			FillX: true,
+			PadY:  2,
 		})
 	}
 
 	// Frame to show off check buttons.
 	mainFrame.Pack(radioButtonFrame(mw), ui.Pack{
-		Anchor: ui.N,
-		FillX:  true,
-		PadY:   8,
+		Side:  ui.N,
+		FillX: true,
+		PadY:  8,
 	})
 
 	err = mw.MainLoop()
@@ -95,8 +95,8 @@ func radioButtonFrame(mw *ui.MainWindow) *ui.Frame {
 	// Top row to show the label and current radiobutton bound value.
 	topFrame := ui.NewFrame("radio button label frame")
 	frame.Pack(topFrame, ui.Pack{
-		Anchor: ui.N,
-		FillX:  true,
+		Side:  ui.N,
+		FillX: true,
 	})
 
 	// Draw the labels.
@@ -105,23 +105,23 @@ func radioButtonFrame(mw *ui.MainWindow) *ui.Frame {
 			Text: "Radio buttons. Value:",
 		})
 		topFrame.Pack(label, ui.Pack{
-			Anchor: ui.W,
+			Side: ui.W,
 		})
 
 		valueLabel := ui.NewLabel(ui.Label{
 			TextVariable: &radioValue,
 		})
 		topFrame.Pack(valueLabel, ui.Pack{
-			Anchor: ui.W,
-			PadX:   4,
+			Side: ui.W,
+			PadX: 4,
 		})
 	}
 
 	// The radio buttons themselves.
 	btnFrame := ui.NewFrame("radio button frame")
 	frame.Pack(btnFrame, ui.Pack{
-		Anchor: ui.N,
-		FillX:  true,
+		Side:  ui.N,
+		FillX: true,
 	})
 	{
 		colors := []string{"Red", "Green", "Blue", "Yellow"}
@@ -133,8 +133,8 @@ func radioButtonFrame(mw *ui.MainWindow) *ui.Frame {
 			}))
 			mw.Add(btn)
 			btnFrame.Pack(btn, ui.Pack{
-				Anchor: ui.W,
-				PadX:   2,
+				Side: ui.W,
+				PadX: 2,
 			})
 		}
 	}

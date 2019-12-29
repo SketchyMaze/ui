@@ -10,7 +10,7 @@ import (
 type Frame struct {
 	Name string
 	BaseWidget
-	packs   map[Anchor][]packedWidget
+	packs   map[Side][]packedWidget
 	widgets []Widget
 }
 
@@ -18,7 +18,7 @@ type Frame struct {
 func NewFrame(name string) *Frame {
 	w := &Frame{
 		Name:    name,
-		packs:   map[Anchor][]packedWidget{},
+		packs:   map[Side][]packedWidget{},
 		widgets: []Widget{},
 	}
 	w.SetBackground(render.RGBA(1, 0, 0, 0)) // invisible default BG
@@ -33,7 +33,7 @@ func NewFrame(name string) *Frame {
 // Setup ensures all the Frame's data is initialized and not null.
 func (w *Frame) Setup() {
 	if w.packs == nil {
-		w.packs = map[Anchor][]packedWidget{}
+		w.packs = map[Side][]packedWidget{}
 	}
 	if w.widgets == nil {
 		w.widgets = []Widget{}
