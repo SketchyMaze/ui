@@ -16,6 +16,12 @@ var (
 	FPS = 60
 )
 
+// Default width and height for MainWindow.
+var (
+	DefaultWidth  = 640
+	DefaultHeight = 480
+)
+
 // MainWindow is the parent window of a UI application.
 type MainWindow struct {
 	Engine        render.Engine
@@ -27,11 +33,26 @@ type MainWindow struct {
 }
 
 // NewMainWindow initializes the MainWindow. You should probably only have one
-// of these per application.
-func NewMainWindow(title string) (*MainWindow, error) {
+// of these per application. Dimensions are the width and height of the window.
+//
+// Example: NewMainWindow("Title Bar")  // default 640x480 window
+// NewMainWindow("Title", 800, 600)     // both required
+func NewMainWindow(title string, dimensions ...int) (*MainWindow, error) {
+	var (
+		width  = DefaultWidth
+		height = DefaultHeight
+	)
+
+	if len(dimensions) > 0 {
+		if len(dimensions) != 2 {
+			return nil, fmt.Errorf("provide width and height dimensions, like NewMainWindow(title, 800, 600)")
+		}
+		width, height = dimensions[0], dimensions[1]
+	}
+
 	mw := &MainWindow{
-		w:             800,
-		h:             600,
+		w:             width,
+		h:             height,
 		supervisor:    NewSupervisor(),
 		loopCallbacks: []func(*event.State){},
 	}
@@ -56,6 +77,11 @@ func NewMainWindow(title string) (*MainWindow, error) {
 	return mw, nil
 }
 
+// SetTitle changes the title of the window.
+func (mw *MainWindow) SetTitle(title string) {
+	mw.Engine.SetTitle(title)
+}
+
 // Add a child widget to the window.
 func (mw *MainWindow) Add(w Widget) {
 	mw.supervisor.Add(w)
@@ -65,6 +91,12 @@ func (mw *MainWindow) Add(w Widget) {
 func (mw *MainWindow) Pack(w Widget, pack Pack) {
 	mw.Add(w)
 	mw.frame.Pack(w, pack)
+}
+
+// Place a child widget into the window's default frame.
+func (mw *MainWindow) Place(w Widget, config Place) {
+	mw.Add(w)
+	mw.frame.Place(w, config)
 }
 
 // Frame returns the window's main frame, if needed.

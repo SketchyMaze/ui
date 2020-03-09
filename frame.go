@@ -10,7 +10,10 @@ import (
 type Frame struct {
 	Name string
 	BaseWidget
-	packs   map[Side][]packedWidget
+
+	// Widget placement settings.
+	packs   map[Side][]packedWidget // Packed widgets
+	placed  []placedWidget          // Placed widgets
 	widgets []Widget
 }
 
@@ -48,6 +51,7 @@ func (w *Frame) Children() []Widget {
 // Compute the size of the Frame.
 func (w *Frame) Compute(e render.Engine) {
 	w.computePacked(e)
+	w.computePlaced(e)
 }
 
 // Present the Frame.

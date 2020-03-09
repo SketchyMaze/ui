@@ -1,0 +1,7 @@
+git.kirsle.net/go/render v0.0.0-20200102014411-4d008b5c468d h1:vErak6oVRT2dosyQzcwkjXyWQ2NRIVL8q9R8NOUTtsg=
+git.kirsle.net/go/render v0.0.0-20200102014411-4d008b5c468d/go.mod h1:ywZtC+zE2SpeObfkw0OvG01pWHQadsVQ4WDKOYzaejc=
+github.com/veandco/go-sdl2 v0.4.1 h1:HmSBvVmKWI8LAOeCfTTM8R33rMyPcs6U3o8n325c9Qg=
+github.com/veandco/go-sdl2 v0.4.1/go.mod h1:FB+kTpX9YTE+urhYiClnRzpOXbiWgaU3+5F2AB78DPg=
+golang.org/x/image v0.0.0-20200119044424-58c23975cae1 h1:5h3ngYt7+vXCDZCup/HkCQgW5XwmSvR/nA2JmJ0RErg=
+golang.org/x/image v0.0.0-20200119044424-58c23975cae1/go.mod h1:FeLwcggjj3mMvU+oOTbSwawSJRM1uh48EjtB4UJZlP0=
+golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
