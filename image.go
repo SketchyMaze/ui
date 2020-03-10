@@ -119,6 +119,9 @@ func (w *Image) GetRGBA() *image.RGBA {
 // Compute the widget.
 func (w *Image) Compute(e render.Engine) {
 	w.Resize(w.texture.Size())
+
+	// Call the BaseWidget Compute in case we have subscribers.
+	w.BaseWidget.Compute(e)
 }
 
 // Present the widget.
@@ -131,4 +134,7 @@ func (w *Image) Present(e render.Engine, p render.Point) {
 		H: size.H,
 	}
 	e.Copy(w.texture, size, dst)
+
+	// Call the BaseWidget Present in case we have subscribers.
+	w.BaseWidget.Present(e, p)
 }

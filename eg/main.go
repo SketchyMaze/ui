@@ -50,7 +50,7 @@ func main() {
 		btn := ui.NewButton(fmt.Sprintf("Button-%d", i), ui.NewLabel(ui.Label{
 			Text: fmt.Sprintf("Button #%d", i),
 		}))
-		btn.Handle(ui.Click, func(p render.Point) {
+		btn.Handle(ui.Click, func(ed ui.EventData) {
 			fmt.Printf("Button %d was clicked\n", i)
 		})
 

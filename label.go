@@ -101,6 +101,9 @@ func (w *Label) Compute(e render.Engine) {
 			H: maxRect.H + (padY * 2),
 		})
 	}
+
+	// Call the BaseWidget Compute in case we have subscribers.
+	w.BaseWidget.Compute(e)
 }
 
 // Present the label widget.
@@ -125,4 +128,7 @@ func (w *Label) Present(e render.Engine, P render.Point) {
 			Y: P.Y + border + padY + (i * w.lineHeight),
 		})
 	}
+
+	// Call the BaseWidget Present in case we have subscribers.
+	w.BaseWidget.Present(e, P)
 }

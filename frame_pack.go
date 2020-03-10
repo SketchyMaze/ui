@@ -53,7 +53,7 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 		widget: child,
 		pack:   C,
 	})
-	w.widgets = append(w.widgets, child)
+	w.Add(child)
 }
 
 // computePacked processes all the Pack layout widgets in the Frame.

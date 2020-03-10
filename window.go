@@ -104,11 +104,17 @@ func (w *Window) ConfigureTitle(C Config) {
 // Compute the window.
 func (w *Window) Compute(e render.Engine) {
 	w.body.Compute(e)
+
+	// Call the BaseWidget Compute in case we have subscribers.
+	w.BaseWidget.Compute(e)
 }
 
 // Present the window.
 func (w *Window) Present(e render.Engine, P render.Point) {
 	w.body.Present(e, P)
+
+	// Call the BaseWidget Present in case we have subscribers.
+	w.BaseWidget.Present(e, P)
 }
 
 // Pack a widget into the window's frame.

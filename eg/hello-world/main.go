@@ -40,16 +40,12 @@ func main() {
 			Padding:      4,
 		},
 	}))
-	button.Handle(ui.Click, func(p render.Point) {
+	button.Handle(ui.Click, func(ed ui.EventData) {
 		fmt.Println("I've been clicked!")
 	})
 	mw.Pack(button, ui.Pack{
 		Side: ui.N,
 	})
-
-	// Add the button to the MainWindow's Supervisor so it can be
-	// clicked on and interacted with.
-	mw.Add(button)
 
 	mw.MainLoop()
 }

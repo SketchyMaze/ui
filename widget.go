@@ -32,8 +32,8 @@ type Widget interface {
 	ResizeAuto(render.Rect)
 	Rect() render.Rect // Return the full absolute rect combining the Size() and Point()
 
-	Handle(Event, func(render.Point))
-	Event(Event, render.Point) // called internally to trigger an event
+	Handle(Event, func(EventData))
+	Event(Event, EventData) // called internally to trigger an event
 
 	// Thickness of the padding + border + outline.
 	BoxThickness(multiplier int) int
@@ -117,7 +117,7 @@ type BaseWidget struct {
 	borderSize   int
 	outlineColor render.Color
 	outlineSize  int
-	handlers     map[Event][]func(render.Point)
+	handlers     map[Event][]func(EventData)
 	hasParent    bool
 	parent       Widget
 }
@@ -471,23 +471,40 @@ func (w *BaseWidget) SetOutlineSize(v int) {
 	w.outlineSize = v
 }
 
+// Compute calls the base widget's Compute function, which just triggers
+// events on widgets that want to be notified when the widget computes.
+func (w *BaseWidget) Compute(e render.Engine) {
+	w.Event(Compute, EventData{
+		Engine: e,
+	})
+}
+
+// Present calls the base widget's Present function, which just triggers
+// events on widgets that want to be notified when the widget presents.
+func (w *BaseWidget) Present(e render.Engine, p render.Point) {
+	w.Event(Present, EventData{
+		Point:  p,
+		Engine: e,
+	})
+}
+
 // Event is called internally by Doodle to trigger an event.
-func (w *BaseWidget) Event(event Event, p render.Point) {
+func (w *BaseWidget) Event(event Event, e EventData) {
 	if handlers, ok := w.handlers[event]; ok {
 		for _, fn := range handlers {
-			fn(p)
+			fn(e)
 		}
 	}
 }
 
 // Handle an event in the widget.
-func (w *BaseWidget) Handle(event Event, fn func(render.Point)) {
+func (w *BaseWidget) Handle(event Event, fn func(EventData)) {
 	if w.handlers == nil {
-		w.handlers = map[Event][]func(render.Point){}
+		w.handlers = map[Event][]func(EventData){}
 	}
 
 	if _, ok := w.handlers[event]; !ok {
-		w.handlers[event] = []func(render.Point){}
+		w.handlers[event] = []func(EventData){}
 	}
 
 	w.handlers[event] = append(w.handlers[event], fn)

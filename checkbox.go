@@ -1,7 +1,5 @@
 package ui
 
-import "git.kirsle.net/go/render"
-
 // Checkbox combines a CheckButton with a widget like a Label.
 type Checkbox struct {
 	Frame
@@ -37,8 +35,8 @@ func makeCheckbox(name string, boolVar *bool, stringVar *string, value string, c
 	// Forward clicks on the child widget to the CheckButton.
 	for _, e := range []Event{MouseOver, MouseOut, MouseUp, MouseDown} {
 		func(e Event) {
-			w.child.Handle(e, func(p render.Point) {
-				w.button.Event(e, p)
+			w.child.Handle(e, func(ed EventData) {
+				w.button.Event(e, ed)
 			})
 		}(e)
 	}

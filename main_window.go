@@ -69,7 +69,6 @@ func NewMainWindow(title string, dimensions ...int) (*MainWindow, error) {
 	// Add a default frame to the window.
 	mw.frame = NewFrame("MainWindow Body")
 	mw.frame.SetBackground(render.RGBA(0, 153, 255, 100))
-	mw.Add(mw.frame)
 
 	// Compute initial window size.
 	mw.resized()

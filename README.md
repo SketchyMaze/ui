@@ -105,6 +105,9 @@ most complex.
   * Pack() lets you add child widgets to the Frame, aligned against one side
     or another, and ability to expand widgets to take up remaining space in
     their part of the Frame.
+  * Place() lets you place child widgets relative to the parent. You can place
+    it at an exact Point, or against the Top, Left, Bottom or Right sides, or
+    aligned to the Center (horizontal) or Middle (vertical) of the parent.
 * [x] **Label**: Textual labels for your UI.
   * Supports TrueType fonts, color, stroke, drop shadow, font size, etc.
   * Variable binding support: TextVariable or IntVariable can point to a

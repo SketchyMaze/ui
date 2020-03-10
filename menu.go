@@ -36,11 +36,17 @@ func NewMenu(name string) *Menu {
 // Compute the menu
 func (w *Menu) Compute(e render.Engine) {
 	w.body.Compute(e)
+
+	// Call the BaseWidget Compute in case we have subscribers.
+	w.BaseWidget.Compute(e)
 }
 
 // Present the menu
 func (w *Menu) Present(e render.Engine, p render.Point) {
 	w.body.Present(e, p)
+
+	// Call the BaseWidget Present in case we have subscribers.
+	w.BaseWidget.Present(e, p)
 }
 
 // AddItem quickly adds an item to a menu.
@@ -90,7 +96,7 @@ func NewMenuItem(label string, command func()) *MenuItem {
 		Background: render.Blue,
 	})
 
-	w.Button.Handle(Click, func(p render.Point) {
+	w.Button.Handle(Click, func(ed EventData) {
 		w.Command()
 	})
 

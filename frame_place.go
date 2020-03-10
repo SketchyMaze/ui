@@ -43,7 +43,7 @@ func (w *Frame) Place(child Widget, config Place) {
 		widget: child,
 		place:  config,
 	})
-	w.widgets = append(w.widgets, child)
+	w.Add(child)
 
 	// Adopt the child widget so it can access the Frame.
 	child.SetParent(w)
@@ -61,6 +61,7 @@ func (w *Frame) computePlaced(e render.Engine) {
 		switch row.place.Strategy() {
 		case "Point":
 			row.widget.MoveTo(row.place.Point)
+			row.widget.Compute(e)
 		case "Side":
 			var moveTo render.Point
 
@@ -87,6 +88,7 @@ func (w *Frame) computePlaced(e render.Engine) {
 				moveTo.Y = frameSize.H - (w.Size().H / 2) - (row.widget.Size().H / 2)
 			}
 			row.widget.MoveTo(moveTo)
+			row.widget.Compute(e)
 		}
 
 		// If this widget itself has placed widgets, call its function too.

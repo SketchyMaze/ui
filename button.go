@@ -35,20 +35,20 @@ func NewButton(name string, child Widget) *Button {
 		Background:   theme.ButtonBackgroundColor,
 	})
 
-	w.Handle(MouseOver, func(p render.Point) {
+	w.Handle(MouseOver, func(e EventData) {
 		w.hovering = true
 		w.SetBackground(theme.ButtonHoverColor)
 	})
-	w.Handle(MouseOut, func(p render.Point) {
+	w.Handle(MouseOut, func(e EventData) {
 		w.hovering = false
 		w.SetBackground(theme.ButtonBackgroundColor)
 	})
 
-	w.Handle(MouseDown, func(p render.Point) {
+	w.Handle(MouseDown, func(e EventData) {
 		w.clicked = true
 		w.SetBorderStyle(BorderSunken)
 	})
-	w.Handle(MouseUp, func(p render.Point) {
+	w.Handle(MouseUp, func(e EventData) {
 		w.clicked = false
 		w.SetBorderStyle(BorderRaised)
 	})
@@ -74,6 +74,8 @@ func (w *Button) Compute(e render.Engine) {
 			H: size.H + w.BoxThickness(2),
 		})
 	}
+
+	w.BaseWidget.Compute(e)
 }
 
 // SetText conveniently sets the button text, for Label children only.
@@ -118,4 +120,6 @@ func (w *Button) Present(e render.Engine, P render.Point) {
 
 	// Draw the text label inside.
 	w.child.Present(e, moveTo)
+
+	w.BaseWidget.Present(e, P)
 }

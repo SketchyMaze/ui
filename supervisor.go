@@ -24,7 +24,18 @@ const (
 	KeyUp
 	KeyPress
 	Drop
+	Compute // fired whenever the widget runs Compute
+	Present // fired whenever the widget runs Present
 )
+
+// EventData carries common data to event handlers.
+type EventData struct {
+	// Point is usually the cursor position on click and mouse events.
+	Point render.Point
+
+	// Engine is the render engine on Compute and Present events.
+	Engine render.Engine
+}
 
 // Supervisor keeps track of widgets of interest to notify them about
 // interaction events such as mouse hovers and clicks in their general
@@ -97,7 +108,9 @@ func (s *Supervisor) Loop(ev *event.State) error {
 		if !ev.Button1 && !ev.Button3 {
 			// The mouse has been released. TODO: make mouse button important?
 			for _, child := range hovering {
-				child.widget.Event(Drop, XY)
+				child.widget.Event(Drop, EventData{
+					Point: XY,
+				})
 			}
 			s.DragStop()
 		}
@@ -117,19 +130,27 @@ func (s *Supervisor) Loop(ev *event.State) error {
 
 		// Cursor has intersected the widget.
 		if _, ok := s.hovering[id]; !ok {
-			w.Event(MouseOver, XY)
+			w.Event(MouseOver, EventData{
+				Point: XY,
+			})
 			s.hovering[id] = nil
 		}
 
 		_, isClicked := s.clicked[id]
 		if ev.Button1 {
 			if !isClicked {
-				w.Event(MouseDown, XY)
+				w.Event(MouseDown, EventData{
+					Point: XY,
+				})
 				s.clicked[id] = nil
 			}
 		} else if isClicked {
-			w.Event(MouseUp, XY)
-			w.Event(Click, XY)
+			w.Event(MouseUp, EventData{
+				Point: XY,
+			})
+			w.Event(Click, EventData{
+				Point: XY,
+			})
 			delete(s.clicked, id)
 		}
 	}
@@ -141,12 +162,16 @@ func (s *Supervisor) Loop(ev *event.State) error {
 
 		// Cursor is not intersecting the widget.
 		if _, ok := s.hovering[id]; ok {
-			w.Event(MouseOut, XY)
+			w.Event(MouseOut, EventData{
+				Point: XY,
+			})
 			delete(s.hovering, id)
 		}
 
 		if _, ok := s.clicked[id]; ok {
-			w.Event(MouseUp, XY)
+			w.Event(MouseUp, EventData{
+				Point: XY,
+			})
 			delete(s.clicked, id)
 		}
 	}
