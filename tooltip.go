@@ -121,6 +121,22 @@ func (w *Tooltip) Compute(e render.Engine) {
 		moveTo.X = tPoint.X + (tSize.W / 2) - (size.W / 2)
 	}
 
+	// Adjust to keep the tooltip from clipping outside the window boundaries.
+	{
+		width, height := e.WindowSize()
+		if moveTo.X < 0 {
+			moveTo.X = 0
+		} else if moveTo.X+size.W > width {
+			moveTo.X = width - size.W
+		}
+
+		if moveTo.Y < 0 {
+			moveTo.Y = 0
+		} else if moveTo.Y+size.H > height {
+			moveTo.Y = height - size.H
+		}
+	}
+
 	w.MoveTo(moveTo)
 }
 
