@@ -77,9 +77,11 @@ func main() {
         Side: ui.N,
     })
 
-    // Add the button to the MainWindow's Supervisor so it can be
-    // clicked on and interacted with.
-    mw.Add(button)
+    // Add a mouse-over tooltip to the button.
+    ui.NewTooltip(button, ui.Tooltip{
+        Text: "You know you want to click this button",
+        Edge: ui.Right,
+    })
 
     mw.MainLoop()
 }
@@ -133,6 +135,7 @@ most complex.
     state of the checkbox.
 * [x] **Window**: a Frame with a title bar Frame on top.
   * Note: Window is not yet draggable or closeable.
+* [x] **Tooltip**: a mouse hover label attached to a widget.
 
 **Work in progress widgets:**
 
