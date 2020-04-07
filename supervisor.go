@@ -2,7 +2,6 @@ package ui
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"git.kirsle.net/go/render"
@@ -23,7 +22,13 @@ const (
 	KeyDown
 	KeyUp
 	KeyPress
-	Drop
+
+	// Drag/drop event handlers.
+	DragStop // if a widget is being dragged and the drag is done
+	DragMove // mouse movements sent to a widget being dragged.
+	Drop     // a "drop site" widget under the cursor when a drag is done
+
+	// Lifecycle event handlers.
 	Compute // fired whenever the widget runs Compute
 	Present // fired whenever the widget runs Present
 )
@@ -45,8 +50,13 @@ type Supervisor struct {
 	serial   int                 // ID number of each widget added in order
 	widgets  map[int]WidgetSlot  // map of widget ID to WidgetSlot
 	hovering map[int]interface{} // map of widgets under the cursor
-	clicked  map[int]interface{} // map of widgets being clicked
+	clicked  map[int]bool        // map of widgets being clicked
 	dd       *DragDrop
+
+	// List of window focus history for Window Manager.
+	winFocus  *FocusedWindow
+	winTop    *FocusedWindow // pointer to top-most window
+	winBottom *FocusedWindow // pointer to bottom-most window
 }
 
 // WidgetSlot holds a widget with a unique ID number in a sorted list.
@@ -60,13 +70,27 @@ func NewSupervisor() *Supervisor {
 	return &Supervisor{
 		widgets:  map[int]WidgetSlot{},
 		hovering: map[int]interface{}{},
-		clicked:  map[int]interface{}{},
+		clicked:  map[int]bool{},
 		dd:       NewDragDrop(),
 	}
 }
 
-// DragStart sets the drag state.
+// DragStart sets the drag state without a widget.
+//
+// An example where you'd use this is if you want a widget to respond to a
+// Drop event (mouse released over a drop-site widget) but the 'thing' being
+// dragged is not a ui.Widget, i.e., for custom app specific logic.
 func (s *Supervisor) DragStart() {
+	s.dd.Start()
+}
+
+// DragStartWidget sets the drag state to true with a target widget attached.
+//
+// The widget being dragged is given DragMove events while the drag is
+// underway. When the mouse button is released, the widget is given a
+// DragStop event and the widget below the cursor is given a Drop event.
+func (s *Supervisor) DragStartWidget(w Widget) {
+	s.dd.SetWidget(w)
 	s.dd.Start()
 }
 
@@ -85,6 +109,7 @@ var (
 	// The caller should STOP forwarding any mouse or keyboard events to any
 	// other handles for the remainder of this tick.
 	ErrStopPropagation = errors.New("stop all event propagation")
+	ErrNoEventHandler  = errors.New("no event handler")
 )
 
 // Loop to check events and pass them to managed widgets.
@@ -113,68 +138,29 @@ func (s *Supervisor) Loop(ev *event.State) error {
 				})
 			}
 			s.DragStop()
+		} else {
+			// If we have a target widget being dragged, send it mouse events.
+			if target := s.dd.Widget(); target != nil {
+				target.Event(DragMove, EventData{
+					Point: XY,
+				})
+			}
 		}
 		return ErrStopPropagation
 	}
 
-	for _, child := range hovering {
-		var (
-			id = child.id
-			w  = child.widget
-		)
-		if w.Hidden() {
-			// TODO: somehow the Supervisor wasn't triggering hidden widgets
-			// anyway, but I don't know why. Adding this check for safety.
-			continue
-		}
-
-		// Cursor has intersected the widget.
-		if _, ok := s.hovering[id]; !ok {
-			w.Event(MouseOver, EventData{
-				Point: XY,
-			})
-			s.hovering[id] = nil
-		}
-
-		_, isClicked := s.clicked[id]
-		if ev.Button1 {
-			if !isClicked {
-				w.Event(MouseDown, EventData{
-					Point: XY,
-				})
-				s.clicked[id] = nil
-			}
-		} else if isClicked {
-			w.Event(MouseUp, EventData{
-				Point: XY,
-			})
-			w.Event(Click, EventData{
-				Point: XY,
-			})
-			delete(s.clicked, id)
-		}
+	// Run events in managed windows first, from top to bottom.
+	// Widgets in unmanaged windows will be handled next.
+	// err := s.runWindowEvents(XY, ev, hovering, outside)
+	handled, err := s.runWidgetEvents(XY, ev, hovering, outside, true)
+	if err == ErrStopPropagation || handled {
+		// A widget in the active window has accepted an event. Do not pass
+		// the event also to lower widgets.
+		return nil
 	}
-	for _, child := range outside {
-		var (
-			id = child.id
-			w  = child.widget
-		)
 
-		// Cursor is not intersecting the widget.
-		if _, ok := s.hovering[id]; ok {
-			w.Event(MouseOut, EventData{
-				Point: XY,
-			})
-			delete(s.hovering, id)
-		}
-
-		if _, ok := s.clicked[id]; ok {
-			w.Event(MouseUp, EventData{
-				Point: XY,
-			})
-			delete(s.clicked, id)
-		}
-	}
+	// Run events for the other widgets not in a managed window.
+	s.runWidgetEvents(XY, ev, hovering, outside, false)
 
 	return nil
 }
@@ -210,6 +196,143 @@ func (s *Supervisor) Hovering(cursor render.Point) (hovering, outside []WidgetSl
 	return hovering, outside
 }
 
+// runWindowEvents is a subroutine of Supervisor.Loop().
+//
+// After determining the widgets below the cursor (hovering) and outside the
+// cursor, transmit mouse events to the widgets.
+//
+// This function has two use cases:
+// - In runWindowEvents where we run events for the top-most focused window of
+//   the window manager.
+// - In Supervisor.Loop() for the widgets that are NOT owned by a managed
+//   window, so that these widgets always get events.
+//
+// Parameters:
+//    XY (Point): mouse cursor position as calculated in Loop()
+//    ev, hovering, outside: values from Loop(), self explanatory.
+//    behavior: indicates how this method is being used.
+//
+// behavior options:
+//    0: widgets NOT part of a managed window. On this pass, if a widget IS
+//       a part of a window, it gets no events triggered.
+//    1: widgets are part of the active focused window.
+func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering, outside []WidgetSlot, toFocusedWindow bool) (bool, error) {
+	// Do we run any events?
+	var (
+		stopPropagation bool
+		ranEvents       bool
+	)
+
+	// Handler for an Event response errors.
+	handle := func(err error) {
+		// Did any event handler run?
+		if err != ErrNoEventHandler {
+			ranEvents = true
+		}
+
+		// Are we stopping propagation?
+		if err == ErrStopPropagation {
+			stopPropagation = true
+		}
+	}
+
+	for _, child := range hovering {
+		if stopPropagation {
+			break
+		}
+
+		var (
+			id = child.id
+			w  = child.widget
+		)
+		if w.Hidden() {
+			// TODO: somehow the Supervisor wasn't triggering hidden widgets
+			// anyway, but I don't know why. Adding this check for safety.
+			continue
+		}
+
+		// Check if the widget is part of a Window managed by Supervisor.
+		isManaged, isFocused := widgetInFocusedWindow(w)
+
+		// Are we sending events to it?
+		if toFocusedWindow {
+			// Only sending events to widgets owned by the focused window.
+			if !(isManaged && isFocused) {
+				continue
+			}
+		} else {
+			// Sending only to widgets NOT managed by a window. This can include
+			// Window widgets themselves, so lower unfocused windows may be
+			// brought to foreground.
+			window, isWindow := w.(*Window)
+			if isManaged && !isWindow {
+				continue
+			}
+
+			// It is a window, but can only be the non-focused window.
+			if window.focused {
+				continue
+			}
+		}
+
+		// Cursor has intersected the widget.
+		if _, ok := s.hovering[id]; !ok {
+			handle(w.Event(MouseOver, EventData{
+				Point: XY,
+			}))
+			s.hovering[id] = nil
+		}
+
+		isClicked, _ := s.clicked[id]
+		if ev.Button1 {
+			if !isClicked {
+				err := w.Event(MouseDown, EventData{
+					Point: XY,
+				})
+				handle(err)
+				s.clicked[id] = true
+			}
+		} else if isClicked {
+			handle(w.Event(MouseUp, EventData{
+				Point: XY,
+			}))
+			handle(w.Event(Click, EventData{
+				Point: XY,
+			}))
+			delete(s.clicked, id)
+		}
+	}
+	for _, child := range outside {
+		var (
+			id = child.id
+			w  = child.widget
+		)
+
+		// Cursor is not intersecting the widget.
+		if _, ok := s.hovering[id]; ok {
+			handle(w.Event(MouseOut, EventData{
+				Point: XY,
+			}))
+			delete(s.hovering, id)
+		}
+
+		if _, ok := s.clicked[id]; ok {
+			handle(w.Event(MouseUp, EventData{
+				Point: XY,
+			}))
+			delete(s.clicked, id)
+		}
+	}
+
+	// If a stopPropagation was called, return it up the stack.
+	if stopPropagation {
+		return ranEvents, ErrStopPropagation
+	}
+
+	// If ANY event handler was called, return nil to signal
+	return ranEvents, nil
+}
+
 // Widgets returns a channel of widgets managed by the supervisor in the order
 // they were added.
 func (s *Supervisor) Widgets() <-chan WidgetSlot {
@@ -226,15 +349,18 @@ func (s *Supervisor) Widgets() <-chan WidgetSlot {
 }
 
 // Present all widgets managed by the supervisor.
+//
+// NOTE: only the Window Manager feature uses this method, and this method
+// will render the windows from bottom to top with the focused window on top.
+// For other widgets, they should be added to a parent Frame that will call
+// Present on them each time the parent Presents, or otherwise you need to
+// manage the presentation of widgets outside the Supervisor.
 func (s *Supervisor) Present(e render.Engine) {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	fmt.Println("!!! ui.Supervisor.Present() is deprecated")
-	// for child := range s.Widgets() {
-	// 	var w = child.widget
-	// 	w.Present(e, w.Point())
-	// }
+	// Render the window manager windows from bottom to top.
+	s.presentWindows(e)
 }
 
 // Add a widget to be supervised.

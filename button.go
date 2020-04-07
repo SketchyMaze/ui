@@ -35,22 +35,26 @@ func NewButton(name string, child Widget) *Button {
 		Background:   theme.ButtonBackgroundColor,
 	})
 
-	w.Handle(MouseOver, func(e EventData) {
+	w.Handle(MouseOver, func(e EventData) error {
 		w.hovering = true
 		w.SetBackground(theme.ButtonHoverColor)
+		return nil
 	})
-	w.Handle(MouseOut, func(e EventData) {
+	w.Handle(MouseOut, func(e EventData) error {
 		w.hovering = false
 		w.SetBackground(theme.ButtonBackgroundColor)
+		return nil
 	})
 
-	w.Handle(MouseDown, func(e EventData) {
+	w.Handle(MouseDown, func(e EventData) error {
 		w.clicked = true
 		w.SetBorderStyle(BorderSunken)
+		return nil
 	})
-	w.Handle(MouseUp, func(e EventData) {
+	w.Handle(MouseUp, func(e EventData) error {
 		w.clicked = false
 		w.SetBorderStyle(BorderRaised)
+		return nil
 	})
 
 	return w

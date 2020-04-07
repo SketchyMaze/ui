@@ -53,17 +53,21 @@ func NewTooltip(target Widget, tt Tooltip) *Tooltip {
 	// - Hide it on MouseOut
 	// - Compute the tooltip when the parent widget Computes
 	// - Present the tooltip when the parent widget Presents
-	target.Handle(MouseOver, func(ed EventData) {
+	target.Handle(MouseOver, func(ed EventData) error {
 		w.Show()
+		return nil
 	})
-	target.Handle(MouseOut, func(ed EventData) {
+	target.Handle(MouseOut, func(ed EventData) error {
 		w.Hide()
+		return nil
 	})
-	target.Handle(Compute, func(ed EventData) {
+	target.Handle(Compute, func(ed EventData) error {
 		w.Compute(ed.Engine)
+		return nil
 	})
-	target.Handle(Present, func(ed EventData) {
+	target.Handle(Present, func(ed EventData) error {
 		w.Present(ed.Engine, w.Point())
+		return nil
 	})
 
 	w.IDFunc(func() string {

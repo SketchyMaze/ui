@@ -32,8 +32,8 @@ type Widget interface {
 	ResizeAuto(render.Rect)
 	Rect() render.Rect // Return the full absolute rect combining the Size() and Point()
 
-	Handle(Event, func(EventData))
-	Event(Event, EventData) // called internally to trigger an event
+	Handle(Event, func(EventData) error)
+	Event(Event, EventData) error // called internally to trigger an event
 
 	// Thickness of the padding + border + outline.
 	BoxThickness(multiplier int) int
@@ -117,7 +117,7 @@ type BaseWidget struct {
 	borderSize   int
 	outlineColor render.Color
 	outlineSize  int
-	handlers     map[Event][]func(EventData)
+	handlers     map[Event][]func(EventData) error
 	hasParent    bool
 	parent       Widget
 }
@@ -489,22 +489,25 @@ func (w *BaseWidget) Present(e render.Engine, p render.Point) {
 }
 
 // Event is called internally by Doodle to trigger an event.
-func (w *BaseWidget) Event(event Event, e EventData) {
+// Handlers can return ErrStopPropagation to prevent further widgets being
+// notified of events.
+func (w *BaseWidget) Event(event Event, e EventData) error {
 	if handlers, ok := w.handlers[event]; ok {
 		for _, fn := range handlers {
-			fn(e)
+			return fn(e)
 		}
 	}
+	return ErrNoEventHandler
 }
 
 // Handle an event in the widget.
-func (w *BaseWidget) Handle(event Event, fn func(EventData)) {
+func (w *BaseWidget) Handle(event Event, fn func(EventData) error) {
 	if w.handlers == nil {
-		w.handlers = map[Event][]func(EventData){}
+		w.handlers = map[Event][]func(EventData) error{}
 	}
 
 	if _, ok := w.handlers[event]; !ok {
-		w.handlers[event] = []func(EventData){}
+		w.handlers[event] = []func(EventData) error{}
 	}
 
 	w.handlers[event] = append(w.handlers[event], fn)

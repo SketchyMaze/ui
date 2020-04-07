@@ -38,3 +38,51 @@ func AbsoluteRect(w Widget) render.Rect {
 		// below the status bar if we do `+ R.Y` here.
 	}
 }
+
+// widgetInFocusedWindow returns whether a widget (like a Button) is a
+// descendant of a Window that is being Window Managed by Supervisor, and
+// said window is in a Focused state.
+//
+// This is used by Supervisor to decide whether the widget should be given
+// events or not: a widget in a non-focused window ignores events, so that a
+// button in a "lower" window could not be clicked through a "higher" window
+// that overlaps it.
+func widgetInFocusedWindow(w Widget) (isManaged, isFocused bool) {
+	var node = w
+
+	for {
+		// Is the node a Window?
+		if window, ok := node.(*Window); ok {
+			return true, window.Focused()
+		}
+
+		node, _ = node.Parent()
+		if node == nil {
+			return false, true // reached the root
+		}
+	}
+}
+
+// WidgetInManagedWindow returns true if the widget is owned by a ui.Window
+// which is being Window Managed by the Supervisor.
+//
+// Returns true if any parent widget is a Window with managed=true. This
+// boolean is set when you call .Supervise() on the window to be managed by
+// Supervisor.
+func WidgetInManagedWindow(w Widget) bool {
+	var node = w
+
+	for {
+		// Is the node a Window?
+		if window, ok := node.(*Window); ok {
+			if window.managed {
+				return true
+			}
+		}
+
+		node, _ = node.Parent()
+		if node == nil {
+			return false // reached the root
+		}
+	}
+}

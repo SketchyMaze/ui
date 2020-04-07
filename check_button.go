@@ -78,24 +78,28 @@ func (w *CheckButton) setup() {
 		Background:   theme.ButtonBackgroundColor,
 	})
 
-	w.Handle(MouseOver, func(ed EventData) {
+	w.Handle(MouseOver, func(ed EventData) error {
 		w.hovering = true
 		w.SetBackground(theme.ButtonHoverColor)
+		return nil
 	})
-	w.Handle(MouseOut, func(ed EventData) {
+	w.Handle(MouseOut, func(ed EventData) error {
 		w.hovering = false
 		w.SetBackground(theme.ButtonBackgroundColor)
+		return nil
 	})
 
-	w.Handle(MouseDown, func(ed EventData) {
+	w.Handle(MouseDown, func(ed EventData) error {
 		w.clicked = true
 		w.SetBorderStyle(BorderSunken)
+		return nil
 	})
-	w.Handle(MouseUp, func(ed EventData) {
+	w.Handle(MouseUp, func(ed EventData) error {
 		w.clicked = false
+		return nil
 	})
 
-	w.Handle(Click, func(ed EventData) {
+	w.Handle(Click, func(ed EventData) error {
 		var sunken bool
 		if w.BoolVar != nil {
 			if *w.BoolVar {
@@ -114,5 +118,6 @@ func (w *CheckButton) setup() {
 		} else {
 			w.SetBorderStyle(BorderRaised)
 		}
+		return nil
 	})
 }

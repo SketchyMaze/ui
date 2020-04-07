@@ -96,8 +96,9 @@ func NewMenuItem(label string, command func()) *MenuItem {
 		Background: render.Blue,
 	})
 
-	w.Button.Handle(Click, func(ed EventData) {
+	w.Button.Handle(Click, func(ed EventData) error {
 		w.Command()
+		return nil
 	})
 
 	// Assign the button
