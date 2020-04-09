@@ -164,7 +164,6 @@ func (mw *MainWindow) MainLoop() error {
 
 // Loop does one loop of the UI.
 func (mw *MainWindow) Loop() error {
-	fmt.Printf("------ MAIN LOOP\n")
 	mw.Engine.Clear(render.White)
 
 	// Record how long this loop took.

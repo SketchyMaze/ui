@@ -9,8 +9,7 @@ import (
 // Window is a frame with a title bar.
 type Window struct {
 	BaseWidget
-	Title  string
-	Active bool
+	Title string
 
 	// Title bar colors. Sensible defaults are chosen in NewWindow but you
 	// may customize after the fact.
@@ -20,17 +19,25 @@ type Window struct {
 	InactiveTitleForeground render.Color
 
 	// Private widgets.
-	body       *Frame
-	titleBar   *Frame
-	titleLabel *Label
-	content    *Frame
+	body         *Frame
+	titleBar     *Frame
+	titleLabel   *Label
+	titleButtons []*Button
+	content      *Frame
+
+	// Configured title bar buttons.
+	buttonsEnabled int
 
 	// Window manager controls.
 	dragging      bool
 	startDragAt   render.Point // cursor position when drag began
 	dragOrigPoint render.Point // original position of window at drag start
 	focused       bool
-	managed       bool // window is managed by Supervisor
+	managed       bool          // window is managed by Supervisor
+	maximized     bool          // toggled by MaximizeButton
+	origPoint     render.Point  // placement before a maximize
+	origSize      render.Rect   // size before a maximize
+	engine        render.Engine // hang onto the render engine, for Maximize support.
 }
 
 // NewWindow creates a new window.
@@ -42,8 +49,8 @@ func NewWindow(title string) *Window {
 		// Default title bar colors.
 		ActiveTitleBackground:   render.Blue,
 		ActiveTitleForeground:   render.White,
-		InactiveTitleBackground: render.Grey,
-		InactiveTitleForeground: render.Black,
+		InactiveTitleBackground: render.DarkGrey,
+		InactiveTitleForeground: render.Grey,
 	}
 	w.IDFunc(func() string {
 		return fmt.Sprintf("Window<%s %+v>",
@@ -85,11 +92,12 @@ func NewWindow(title string) *Window {
 
 // setupTitlebar creates the title bar frame of the window.
 func (w *Window) setupTitleBar() (*Frame, *Label) {
-	frame := NewFrame("Titlebar for Windows: " + w.Title)
+	frame := NewFrame("Titlebar for Window: " + w.Title)
 	frame.Configure(Config{
 		Background: w.ActiveTitleBackground,
 	})
 
+	// Title label.
 	label := NewLabel(Label{
 		TextVariable: &w.Title,
 		Font: render.Text{
@@ -103,7 +111,89 @@ func (w *Window) setupTitleBar() (*Frame, *Label) {
 		Side: W,
 	})
 
+	// Window buttons.
+	var buttons = []struct {
+		If    bool
+		Label string
+		Event Event
+	}{
+		{
+			Label: "×",
+			Event: CloseWindow,
+		},
+		{
+			Label: "+",
+			Event: MaximizeWindow,
+		},
+		{
+			Label: "_",
+			Event: MinimizeWindow,
+		},
+	}
+	w.titleButtons = make([]*Button, len(buttons))
+	for i, cfg := range buttons {
+		cfg := cfg
+		btn := NewButton(
+			fmt.Sprintf("Title Button %d for Window: %s", i, w.Title),
+			NewLabel(Label{
+				Text: cfg.Label,
+				Font: render.Text{
+					// Color: w.ActiveTitleForeground,
+					Size:    8,
+					Padding: 2,
+				},
+			}),
+		)
+		btn.SetBorderSize(0)
+		btn.Handle(Click, func(ed EventData) error {
+			w.Event(cfg.Event, ed)
+			return ErrStopPropagation // TODO: doesn't work :(
+		})
+		btn.Hide()
+		w.titleButtons[i] = btn
+
+		frame.Pack(btn, Pack{
+			Side: E,
+		})
+	}
+
 	return frame, label
+}
+
+// SetButtons sets the title bar buttons to show in the window.
+//
+// The value should be the OR of CloseButton, MaximizeButton and MinimizeButton
+// that you want to be enabled.
+//
+// Window buttons only work if the window is managed by Supervisor and you have
+// called the Supervise() method of the window.
+func (w *Window) SetButtons(buttons int) {
+	// Show/hide each button based on the value given.
+	var toggle = []struct {
+		Value int
+		Index int
+	}{
+		{
+			Value: CloseButton,
+			Index: 0,
+		},
+		{
+			Value: MaximizeButton,
+			Index: 1,
+		},
+		{
+			Value: MinimizeButton,
+			Index: 2,
+		},
+	}
+
+	for _, item := range toggle {
+		if buttons&item.Value == item.Value {
+			w.titleButtons[item.Index].Show()
+		} else {
+			w.titleButtons[item.Index].Hide()
+		}
+	}
 }
 
 // Supervise enables the window to be dragged around by its title bar by
@@ -113,7 +203,6 @@ func (w *Window) Supervise(s *Supervisor) {
 	w.titleBar.Handle(MouseDown, func(ed EventData) error {
 		w.startDragAt = ed.Point
 		w.dragOrigPoint = w.Point()
-		fmt.Printf("Clicked at %s   window at %s!\n", ed.Point, w.dragOrigPoint)
 
 		s.DragStartWidget(w)
 		return nil
@@ -122,10 +211,6 @@ func (w *Window) Supervise(s *Supervisor) {
 	// Clicking anywhere in the window focuses the window.
 	w.Handle(MouseDown, func(ed EventData) error {
 		s.FocusWindow(w)
-		fmt.Printf("%s handles click event\n", w)
-		return nil
-	})
-	w.Handle(Click, func(ed EventData) error {
 		return nil
 	})
 
@@ -134,7 +219,6 @@ func (w *Window) Supervise(s *Supervisor) {
 		// Get the delta of movement from where we began.
 		delta := w.startDragAt.Compare(ed.Point)
 		if delta != render.Origin {
-			fmt.Printf("    Dragged to: %s   Delta: %s\n", ed.Point, delta)
 			moveTo := w.dragOrigPoint
 			moveTo.Add(delta)
 			w.MoveTo(moveTo)
@@ -142,8 +226,21 @@ func (w *Window) Supervise(s *Supervisor) {
 		return nil
 	})
 
+	// Window button handlers.
+	w.Handle(CloseWindow, func(ed EventData) error {
+		w.Hide()
+		return nil
+	})
+	w.Handle(MaximizeWindow, func(ed EventData) error {
+		w.SetMaximized(!w.maximized)
+		return nil
+	})
+
 	// Add the title bar to the supervisor.
 	s.Add(w.titleBar)
+	for _, btn := range w.titleButtons {
+		s.Add(btn)
+	}
 	s.Add(w)
 
 	// Add the window to the focus list of the supervisor.
@@ -173,6 +270,30 @@ func (w *Window) SetFocus(v bool) {
 	w.titleBar.SetBackground(bg)
 	w.titleLabel.Font.Color = fg
 	w.titleLabel.Font.Stroke = bg.Darken(40)
+}
+
+// Maximized returns whether the window is maximized.
+func (w *Window) Maximized() bool {
+	return w.maximized
+}
+
+// SetMaximized sets the state of the maximized window.
+// Must have called Compute() once before so the window can hang on to the
+// render.Engine, to calculate the size of the parent window.
+func (w *Window) SetMaximized(v bool) {
+	w.maximized = v
+
+	if v && w.engine != nil {
+		w.origPoint = w.Point()
+		w.origSize = w.Size()
+		w.MoveTo(render.Origin)
+		w.Resize(render.NewRect(w.engine.WindowSize()))
+		w.Compute(w.engine)
+	} else if w.engine != nil {
+		w.MoveTo(w.origPoint)
+		w.Resize(w.origSize)
+		w.Compute(w.engine)
+	}
 }
 
 // Children returns the window's child widgets.
@@ -216,6 +337,7 @@ func (w *Window) ConfigureTitle(C Config) {
 
 // Compute the window.
 func (w *Window) Compute(e render.Engine) {
+	w.engine = e // hang onto it in case of maximize
 	w.body.Compute(e)
 
 	// Call the BaseWidget Compute in case we have subscribers.

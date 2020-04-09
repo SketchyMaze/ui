@@ -25,6 +25,8 @@ func AbsolutePosition(w Widget) render.Point {
 }
 
 // AbsoluteRect returns a Rect() offset with the absolute position.
+// X and Y are the AbsolutePosition of the widget.
+// W and H are the widget's width and height. (X,Y not added to them)
 func AbsoluteRect(w Widget) render.Rect {
 	var (
 		P = AbsolutePosition(w)
@@ -33,7 +35,7 @@ func AbsoluteRect(w Widget) render.Rect {
 	return render.Rect{
 		X: P.X,
 		Y: P.Y,
-		W: R.W + P.X,
+		W: R.W,
 		H: R.H, // TODO: the Canvas in EditMode lets you draw pixels
 		// below the status bar if we do `+ R.Y` here.
 	}
@@ -53,36 +55,12 @@ func widgetInFocusedWindow(w Widget) (isManaged, isFocused bool) {
 	for {
 		// Is the node a Window?
 		if window, ok := node.(*Window); ok {
-			return true, window.Focused()
+			return window.managed, window.Focused()
 		}
 
 		node, _ = node.Parent()
 		if node == nil {
 			return false, true // reached the root
-		}
-	}
-}
-
-// WidgetInManagedWindow returns true if the widget is owned by a ui.Window
-// which is being Window Managed by the Supervisor.
-//
-// Returns true if any parent widget is a Window with managed=true. This
-// boolean is set when you call .Supervise() on the window to be managed by
-// Supervisor.
-func WidgetInManagedWindow(w Widget) bool {
-	var node = w
-
-	for {
-		// Is the node a Window?
-		if window, ok := node.(*Window); ok {
-			if window.managed {
-				return true
-			}
-		}
-
-		node, _ = node.Parent()
-		if node == nil {
-			return false // reached the root
 		}
 	}
 }

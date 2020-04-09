@@ -28,6 +28,11 @@ const (
 	DragMove // mouse movements sent to a widget being dragged.
 	Drop     // a "drop site" widget under the cursor when a drag is done
 
+	// Window Manager events.
+	CloseWindow
+	MaximizeWindow
+	MinimizeWindow
+
 	// Lifecycle event handlers.
 	Compute // fired whenever the widget runs Compute
 	Present // fired whenever the widget runs Present
@@ -149,6 +154,18 @@ func (s *Supervisor) Loop(ev *event.State) error {
 		return ErrStopPropagation
 	}
 
+	// Check if the top focused window has been closed and auto-focus the next.
+	if s.winFocus != nil && s.winFocus.window.Hidden() {
+		next := s.winFocus.next
+		for next != nil {
+			if !next.window.Hidden() {
+				s.FocusWindow(next.window)
+				break
+			}
+			next = next.next
+		}
+	}
+
 	// Run events in managed windows first, from top to bottom.
 	// Widgets in unmanaged windows will be handled next.
 	// err := s.runWindowEvents(XY, ev, hovering, outside)
@@ -223,6 +240,18 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 		ranEvents       bool
 	)
 
+	// If we're running this method in "Phase 2" (to widgets NOT in the focused
+	// window), only send mouse events to widgets if the cursor is NOT inside
+	// the bounding box of the active focused window. Prevents clicking "thru"
+	// the window and activating widgets/other windows behind it.
+	var cursorInsideFocusedWindow bool
+	if !toFocusedWindow && s.winFocus != nil {
+		// Get the bounding box of the focused window.
+		if XY.Inside(AbsoluteRect(s.winFocus.window)) {
+			cursorInsideFocusedWindow = true
+		}
+	}
+
 	// Handler for an Event response errors.
 	handle := func(err error) {
 		// Did any event handler run?
@@ -238,6 +267,13 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 
 	for _, child := range hovering {
 		if stopPropagation {
+			break
+		}
+
+		// If the cursor is inside the box of the focused window, don't trigger
+		// active (hovering) mouse events. MouseOut type events, below, can still
+		// trigger.
+		if cursorInsideFocusedWindow {
 			break
 		}
 
@@ -270,7 +306,7 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 			}
 
 			// It is a window, but can only be the non-focused window.
-			if window.focused {
+			if isWindow && window.focused {
 				continue
 			}
 		}

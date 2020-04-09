@@ -12,6 +12,19 @@ window_manager.go holds data types and Supervisor methods related to the
 management of ui.Window widgets.
 */
 
+// Window button options. OR these together in a call to Window.SetButtons().
+const (
+	CloseButton = 0x01
+
+	// NOTICE: MaximizeButton behavior is currently buggy, window doesn't
+	// redraw itself at the new size properly.
+	MaximizeButton = 0x02
+
+	// Minimize button has no default behavior attached; you can bind it with
+	// window.Handle(MinimizeWindow) to set your own event handler.
+	MinimizeButton = 0x04
+)
+
 // FocusedWindow is a doubly-linked list of recently focused Windows, with
 // the current and most-recently focused on top. TODO make not exported.
 type FocusedWindow struct {
@@ -66,15 +79,6 @@ func (s *Supervisor) addWindow(win *Window) {
 		oldTop.prev = s.winFocus
 		oldTop.window.SetFocus(false)
 		win.SetFocus(true)
-	}
-}
-
-// presentWindows draws the windows from bottom to top.
-func (s *Supervisor) presentWindows(e render.Engine) {
-	item := s.winBottom
-	for item != nil {
-		item.window.Present(e, item.window.Point())
-		item = item.prev
 	}
 }
 
@@ -145,4 +149,14 @@ func (s *Supervisor) FocusWindow(win *Window) error {
 	}
 
 	return nil
+}
+
+// presentWindows draws the windows from bottom to top.
+func (s *Supervisor) presentWindows(e render.Engine) {
+	item := s.winBottom
+	for item != nil {
+		item.window.Compute(e)
+		item.window.Present(e, item.window.Point())
+		item = item.prev
+	}
 }

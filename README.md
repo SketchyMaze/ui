@@ -134,7 +134,9 @@ most complex.
     label next to a small check button. Clicking the label will toggle the
     state of the checkbox.
 * [x] **Window**: a Frame with a title bar Frame on top.
-  * Note: Window is not yet draggable or closeable.
+  * Can be managed by Supervisor to give Window Manager controls to it
+    (drag it by its title bar, Close button, window focus, multiple overlapping
+    windows, and so on).
 * [x] **Tooltip**: a mouse hover label attached to a widget.
 
 **Work in progress widgets:**
@@ -155,12 +157,6 @@ most complex.
 
 * [ ] **SelectBox:** a kind of MenuButton that lets the user choose a value
   from a list of possible values, bound to a string variable.
-* [ ] **WindowManager**: manages Window widgets and focus support for all
-  interactable widgets.
-  * Would enable Windows to be dragged around by their title bar, overlap
-    other Windows, and rise on top of other Windows when clicked.
-  * Would enable "focus" support for Buttons, Text Boxes and other
-    interactable widgets.
 * [ ] **TextBox:** an editable text field that the user can focus and type
   a value into.
   * Would depend on the WindowManager to manage focus for the widgets.
@@ -205,6 +201,76 @@ to it, and call its Loop() method in your main loop so it can update the
 state of the widgets under its care.
 
 The MainWindow includes its own Supervisor, see below.
+
+## Window Manager
+
+The ui.Window widget provides a simple frame with a title bar. But, you can
+use the Supervisor to provide Window Manager controls to your windows!
+
+The key steps to convert a static Window widget into one that can be dragged
+around by its title bar are:
+
+1. Call `window.Supervise(ui.Supervisor)` and give it your Supervisor. It will
+   register itself to be managed by the Supervisor.
+2. In your main loop, call `Supervisor.Loop()` as you normally would. It
+   handles sending mouse and keyboard events to all managed widgets, including
+   the children of the managed windows.
+3. In the "draw" part of your main loop, call `Supervisor.Present()` as the
+   final step. Supervisor will draw the managed windows on top of everything
+   else, with the current focused window on top of the others. Note: managed
+   windows are the _only_ widgets drawn by Supervisor; other widgets should be
+   drawn by their parent widgets in their respective Present() methods.
+
+You can also customize the colors and title bar controls of the managed windows.
+
+Example:
+
+```go
+func example() {
+    engine, _ := sdl.New("Example", 800, 600)
+    supervisor := ui.NewSupervisor()
+
+    win := ui.NewWindow("My Window")
+
+    // Customize the colors of the window. Here are the defaults:
+    win.ActiveTitleBackground = render.Blue
+    win.ActiveTitleForeground = render.White
+    win.InactiveTitleBackground = render.DarkGrey
+    win.InactiveTitleForeground = render.Grey
+
+    // Customize the window buttons by ORing the options.
+    // NOTE: Maximize behavior is still a work in progress, the window doesn't
+    //       redraw itself at the new size correctly yet.
+    // NOTE: Minimize button has no default behavior but does trigger a
+    //       MinimizeWindow event that you can handle yourself.
+    win.SetButtons(ui.CloseButton | ui.MaximizeButton | ui.MinimizeButton)
+
+    // Add widgets to your window.
+    label := ui.NewLabel(ui.Label{
+       Text: "Hello world!",
+    })
+    win.Pack(label, ui.Pack{
+        Side: ui.W,
+    })
+
+    // Compute the window and its children.
+    win.Compute(engine)
+
+    // This is the key step: give the window to the Supervisor.
+    win.Supervise(supervisor)
+
+    // And in your main loop:
+    // NOTE: MainWindow.MainLoop() does this for you automatically.
+    for {
+        ev, _ = engine.Poll()  // poll render engine for mouse/keyboard events
+        supervisor.Loop(ev)
+        supervisor.Present(engine)
+    }
+}
+```
+
+See the eg/windows/ example in the git repository for a full example, including
+SDL2 and WebAssembly versions.
 
 ## MainWindow for Simple Applications
 

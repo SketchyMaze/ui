@@ -494,7 +494,10 @@ func (w *BaseWidget) Present(e render.Engine, p render.Point) {
 func (w *BaseWidget) Event(event Event, e EventData) error {
 	if handlers, ok := w.handlers[event]; ok {
 		for _, fn := range handlers {
-			return fn(e)
+			res := fn(e)
+			if res == ErrStopPropagation {
+				return res
+			}
 		}
 	}
 	return ErrNoEventHandler
