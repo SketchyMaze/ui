@@ -151,6 +151,19 @@ func (s *Supervisor) FocusWindow(win *Window) error {
 	return nil
 }
 
+// IsPointInWindow returns whether the given Point overlaps with a window managed
+// by the Supervisor.
+func (s *Supervisor) IsPointInWindow(point render.Point) bool {
+	node := s.winFocus
+	for node != nil {
+		if point.Inside(AbsoluteRect(node.window)) {
+			return true
+		}
+		node = node.next
+	}
+	return false
+}
+
 // presentWindows draws the windows from bottom to top.
 func (s *Supervisor) presentWindows(e render.Engine) {
 	item := s.winBottom

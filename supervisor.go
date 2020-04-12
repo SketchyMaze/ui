@@ -173,7 +173,7 @@ func (s *Supervisor) Loop(ev *event.State) error {
 	if err == ErrStopPropagation || handled {
 		// A widget in the active window has accepted an event. Do not pass
 		// the event also to lower widgets.
-		return nil
+		return err
 	}
 
 	// Run events for the other widgets not in a managed window.
