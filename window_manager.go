@@ -156,7 +156,7 @@ func (s *Supervisor) FocusWindow(win *Window) error {
 func (s *Supervisor) IsPointInWindow(point render.Point) bool {
 	node := s.winFocus
 	for node != nil {
-		if point.Inside(AbsoluteRect(node.window)) {
+		if point.Inside(AbsoluteRect(node.window)) && !node.window.hidden {
 			return true
 		}
 		node = node.next
