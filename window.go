@@ -296,6 +296,12 @@ func (w *Window) SetMaximized(v bool) {
 	}
 }
 
+// Close the window, hiding it from display and calling its CloseWindow handler.
+func (w *Window) Close() {
+	w.Hide()
+	w.Event(CloseWindow, EventData{})
+}
+
 // Children returns the window's child widgets.
 func (w *Window) Children() []Widget {
 	return []Widget{

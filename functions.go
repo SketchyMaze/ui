@@ -41,6 +41,19 @@ func AbsoluteRect(w Widget) render.Rect {
 	}
 }
 
+// HasParent returns whether the target widget is a descendant of the parent.
+// This scans the parents of the widget recursively until it finds a match.
+func HasParent(w Widget, parent Widget) bool {
+	next, ok := w.Parent()
+	for ok {
+		if next == parent {
+			return true
+		}
+		next, ok = next.Parent()
+	}
+	return false
+}
+
 // widgetInFocusedWindow returns whether a widget (like a Button) is a
 // descendant of a Window that is being Window Managed by Supervisor, and
 // said window is in a Focused state.

@@ -164,6 +164,21 @@ func (s *Supervisor) IsPointInWindow(point render.Point) bool {
 	return false
 }
 
+// CloseAllWindows closes all open windows being managed by supervisor.
+// Returns the number of windows closed.
+func (s *Supervisor) CloseAllWindows() int {
+	var (
+		node = s.winFocus
+		i    = 0
+	)
+	for node != nil {
+		i++
+		node.window.Hide()
+		node = node.next
+	}
+	return i
+}
+
 // presentWindows draws the windows from bottom to top.
 func (s *Supervisor) presentWindows(e render.Engine) {
 	item := s.winBottom

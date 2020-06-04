@@ -138,25 +138,21 @@ most complex.
     (drag it by its title bar, Close button, window focus, multiple overlapping
     windows, and so on).
 * [x] **Tooltip**: a mouse hover label attached to a widget.
+* [x] **MenuButton**: a button that opens a modal pop-up menu on click.
+* [x] **MenuBar**: a specialized Frame that groups a bunch of MenuButtons and
+  provides a simple API to add menus and items to it.
+* [x] **Menu**: a frame full of clickable links and separators. Usually used as
+  a modal pop-up by the MenuButton and MenuBar.
 
 **Work in progress widgets:**
 
-* [x] **Menu**: a frame with clickable menu items.
-  * To be a base widget behind right-click context menus, pull-down menus
-    from a MenuBar, options from a SelectBox and so on.
-  * Powered by Frame and Button but with a nice API for composing menu
-    actions.
-  * Partially implemented so far.
-* [ ] **MenuButton**: a Button that opens a Menu when clicked.
-* [ ] **MenuBar**: a Frame that houses many MenuButtons, intended for the
-  main menu at the top of a UI window (File, Edit, Help, etc.).
 * [ ] **Scrollbar**: a Frame including a trough, scroll buttons and a
   draggable slider.
+* [ ] **SelectBox:** a kind of MenuButton that lets the user choose a value
+  from a list of possible values, bound to a string variable.
 
 **Wish list for the longer-term future:**
 
-* [ ] **SelectBox:** a kind of MenuButton that lets the user choose a value
-  from a list of possible values, bound to a string variable.
 * [ ] **TextBox:** an editable text field that the user can focus and type
   a value into.
   * Would depend on the WindowManager to manage focus for the widgets.
