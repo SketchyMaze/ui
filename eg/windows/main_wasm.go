@@ -24,7 +24,7 @@ var (
 	Height = 768
 
 	// Cascade offset for creating multiple windows.
-	Cascade      = render.NewPoint(10, 10)
+	Cascade      = render.NewPoint(10, 32)
 	CascadeStep  = render.NewPoint(24, 24)
 	CascadeLoops = 1
 
@@ -73,6 +73,20 @@ func main() {
 		height-lbl.Size().H-20,
 	))
 
+	// Menu bar.
+	menu := ui.NewMenuBar("Main Menu")
+	file := menu.AddMenu("Options")
+	file.AddItem("New window", func() {
+		addWindow(mw, frame, supervisor)
+	})
+	file.AddItem("Close all windows", func() {
+		OpenWindows -= supervisor.CloseAllWindows()
+	})
+
+	menu.Supervise(supervisor)
+	menu.Compute(mw)
+	frame.Pack(menu, menu.PackTop())
+
 	// Add some windows to play with.
 	addWindow(mw, frame, supervisor)
 	addWindow(mw, frame, supervisor)
@@ -85,6 +99,7 @@ func main() {
 			panic(err)
 		}
 
+		frame.Present(mw, frame.Point())
 		lbl.Present(mw, lbl.Point())
 		supervisor.Loop(ev)
 		supervisor.Present(mw)

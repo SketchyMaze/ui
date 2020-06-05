@@ -5,6 +5,14 @@ import (
 	"strings"
 )
 
+// PrintWidgetTree prints a widget tree to console.
+func PrintWidgetTree(root Widget) {
+	fmt.Printf("--- Widget Tree of %s ---\n", root)
+	for _, row := range WidgetTree(root) {
+		fmt.Println(row)
+	}
+}
+
 // WidgetTree returns a string representing the tree of widgets starting
 // at a given widget.
 func WidgetTree(root Widget) []string {

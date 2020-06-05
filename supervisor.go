@@ -32,6 +32,7 @@ const (
 	CloseWindow
 	MaximizeWindow
 	MinimizeWindow
+	CloseModal
 
 	// Lifecycle event handlers.
 	Compute // fired whenever the widget runs Compute
@@ -45,6 +46,9 @@ type EventData struct {
 
 	// Engine is the render engine on Compute and Present events.
 	Engine render.Engine
+
+	// Supervisor is the reference to the supervisor who sent the event.
+	Supervisor *Supervisor
 }
 
 // Supervisor keeps track of widgets of interest to notify them about
@@ -57,6 +61,9 @@ type Supervisor struct {
 	hovering map[int]interface{} // map of widgets under the cursor
 	clicked  map[int]bool        // map of widgets being clicked
 	dd       *DragDrop
+
+	// Stack of modal widgets that have event priority.
+	modals []Widget
 
 	// List of window focus history for Window Manager.
 	winFocus  *FocusedWindow
@@ -76,6 +83,7 @@ func NewSupervisor() *Supervisor {
 		widgets:  map[int]WidgetSlot{},
 		hovering: map[int]interface{}{},
 		clicked:  map[int]bool{},
+		modals:   []Widget{},
 		dd:       NewDragDrop(),
 	}
 }
@@ -169,14 +177,18 @@ func (s *Supervisor) Loop(ev *event.State) error {
 	// Run events in managed windows first, from top to bottom.
 	// Widgets in unmanaged windows will be handled next.
 	// err := s.runWindowEvents(XY, ev, hovering, outside)
-	handled, err := s.runWidgetEvents(XY, ev, hovering, outside, true)
-	if err == ErrStopPropagation || handled {
-		// A widget in the active window has accepted an event. Do not pass
-		// the event also to lower widgets.
-		return err
+	// Only run if there is no active modal (modals have top priority)
+	if len(s.modals) == 0 {
+		handled, err := s.runWidgetEvents(XY, ev, hovering, outside, true)
+		if err == ErrStopPropagation || handled {
+			// A widget in the active window has accepted an event. Do not pass
+			// the event also to lower widgets.
+			return err
+		}
 	}
 
 	// Run events for the other widgets not in a managed window.
+	// (Modal event priority is handled in runWidgetEvents)
 	s.runWidgetEvents(XY, ev, hovering, outside, false)
 
 	return nil
@@ -233,12 +245,20 @@ func (s *Supervisor) Hovering(cursor render.Point) (hovering, outside []WidgetSl
 //    0: widgets NOT part of a managed window. On this pass, if a widget IS
 //       a part of a window, it gets no events triggered.
 //    1: widgets are part of the active focused window.
-func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering, outside []WidgetSlot, toFocusedWindow bool) (bool, error) {
+func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
+	hovering, outside []WidgetSlot, toFocusedWindow bool) (bool, error) {
 	// Do we run any events?
 	var (
 		stopPropagation bool
 		ranEvents       bool
 	)
+
+	// Do we have active modals? Modal widgets have top event priority given
+	// only to the top-most modal.
+	var modal Widget
+	if len(s.modals) > 0 {
+		modal = s.modals[len(s.modals)-1]
+	}
 
 	// If we're running this method in "Phase 2" (to widgets NOT in the focused
 	// window), only send mouse events to widgets if the cursor is NOT inside
@@ -273,7 +293,8 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 		// If the cursor is inside the box of the focused window, don't trigger
 		// active (hovering) mouse events. MouseOut type events, below, can still
 		// trigger.
-		if cursorInsideFocusedWindow {
+		// Does not apply when a modal widget is active.
+		if cursorInsideFocusedWindow && modal == nil {
 			break
 		}
 
@@ -285,6 +306,14 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 			// TODO: somehow the Supervisor wasn't triggering hidden widgets
 			// anyway, but I don't know why. Adding this check for safety.
 			continue
+		}
+
+		// If we have a modal active, validate this widget is a child of
+		// the modal widget.
+		if modal != nil {
+			if !HasParent(w, modal) {
+				continue
+			}
 		}
 
 		// Check if the widget is part of a Window managed by Supervisor.
@@ -344,6 +373,14 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 			w  = child.widget
 		)
 
+		// If we have a modal active, validate this widget is a child of
+		// the modal widget.
+		if modal != nil {
+			if !HasParent(w, modal) {
+				continue
+			}
+		}
+
 		// Cursor is not intersecting the widget.
 		if _, ok := s.hovering[id]; ok {
 			handle(w.Event(MouseOut, EventData{
@@ -357,6 +394,16 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State, hovering,
 				Point: XY,
 			}))
 			delete(s.clicked, id)
+		}
+	}
+
+	// If a modal is active and a click was registered outside the modal's
+	// bounding box, send the CloseModal event.
+	if modal != nil && !XY.Inside(AbsoluteRect(modal)) {
+		if ev.Button1 {
+			modal.Event(CloseModal, EventData{
+				Supervisor: s,
+			})
 		}
 	}
 
@@ -397,15 +444,69 @@ func (s *Supervisor) Present(e render.Engine) {
 
 	// Render the window manager windows from bottom to top.
 	s.presentWindows(e)
+
+	// Render the modals from bottom to top.
+	if len(s.modals) > 0 {
+		for _, modal := range s.modals {
+			modal.Present(e, modal.Point())
+		}
+	}
 }
 
-// Add a widget to be supervised.
+// Add a widget to be supervised. Has no effect if the widget is already
+// under the supervisor's care.
 func (s *Supervisor) Add(w Widget) {
 	s.lock.Lock()
+
+	// Check it's not already there.
+	for _, child := range s.widgets {
+		if child.widget == w {
+			return
+		}
+	}
+
+	// Add it.
 	s.widgets[s.serial] = WidgetSlot{
 		id:     s.serial,
 		widget: w,
 	}
 	s.serial++
 	s.lock.Unlock()
+}
+
+// PushModal sets the widget to be a "modal" for the Supervisor.
+//
+// Modal widgets have top-most event priority: mouse and click events go ONLY
+// to the modal and its descendants. Modals work as a stack: the most recently
+// pushed widget is the active modal, and popping the modal will make the
+// next most-recent widget be the active modal.
+//
+// If a Click event registers OUTSIDE the bounds of the modal widget, the
+// widget receives a CloseModal event.
+//
+// Returns the length of the modal stack.
+func (s *Supervisor) PushModal(w Widget) int {
+	s.modals = append(s.modals, w)
+	return len(s.modals)
+}
+
+// PopModal attempts to pop the modal from the stack, but only if the modal
+// is at the top of the stack.
+//
+// A widget may safely attempt to PopModal itself on a CloseModal event to
+// close themselves when the user clicks outside their box. If there were a
+// newer modal on the stack, this PopModal action would do nothing.
+func (s *Supervisor) PopModal(w Widget) bool {
+	// only can pop if the topmost widget is the one being asked for
+	if len(s.modals) > 0 && s.modals[len(s.modals)-1] == w {
+		modal := s.modals[len(s.modals)-1]
+		modal.Hide()
+
+		// pop it off
+		s.modals = s.modals[:len(s.modals)-1]
+
+		return true
+	}
+
+	return false
 }

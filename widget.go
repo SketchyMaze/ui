@@ -309,8 +309,13 @@ func (w *BaseWidget) Hidden() bool {
 		return true
 	}
 
-	if parent, ok := w.Parent(); ok {
-		return parent.Hidden()
+	// Return if any parents are hidden.
+	parent, ok := w.Parent()
+	for ok {
+		if parent.Hidden() {
+			return true
+		}
+		parent, ok = parent.Parent()
 	}
 
 	return false
