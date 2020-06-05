@@ -183,7 +183,7 @@ func (s *Supervisor) Loop(ev *event.State) error {
 		if err == ErrStopPropagation || handled {
 			// A widget in the active window has accepted an event. Do not pass
 			// the event also to lower widgets.
-			return err
+			return ErrStopPropagation
 		}
 	}
 
@@ -407,6 +407,12 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
 		}
 	}
 
+	// If there was a modal, return stopPropagation (so callers that manage
+	// events externally of go/ui can see that a modal intercepted events)
+	if modal != nil {
+		return ranEvents, ErrStopPropagation
+	}
+
 	// If a stopPropagation was called, return it up the stack.
 	if stopPropagation {
 		return ranEvents, ErrStopPropagation
@@ -509,4 +515,13 @@ func (s *Supervisor) PopModal(w Widget) bool {
 	}
 
 	return false
+}
+
+// GetModal returns the modal on the top of the stack, or nil if there is
+// no modal on top.
+func (s *Supervisor) GetModal() Widget {
+	if len(s.modals) == 0 {
+		return nil
+	}
+	return s.modals[len(s.modals)-1]
 }
