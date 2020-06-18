@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"git.kirsle.net/go/render"
+	"git.kirsle.net/go/ui/style"
 )
 
 // Window is a frame with a title bar.
@@ -19,6 +20,7 @@ type Window struct {
 	InactiveTitleForeground render.Color
 
 	// Private widgets.
+	style        *style.Window
 	body         *Frame
 	titleBar     *Frame
 	titleLabel   *Label
@@ -58,12 +60,6 @@ func NewWindow(title string) *Window {
 		)
 	})
 
-	w.body.Configure(Config{
-		Background:  render.Grey,
-		BorderSize:  2,
-		BorderStyle: BorderRaised,
-	})
-
 	// Title bar widget.
 	titleBar, titleLabel := w.setupTitleBar()
 	w.body.Pack(titleBar, Pack{
@@ -87,7 +83,30 @@ func NewWindow(title string) *Window {
 	// Set up parent/child relationships
 	w.body.SetParent(w)
 
+	w.SetStyle(Theme.Window)
+
 	return w
+}
+
+// SetStyle sets the window style.
+func (w *Window) SetStyle(v *style.Window) {
+	if v == nil {
+		v = &style.DefaultWindow
+	}
+
+	w.style = v
+	w.body.Configure(Config{
+		Background:  w.style.ActiveBackground,
+		BorderSize:  2,
+		BorderStyle: BorderRaised,
+	})
+	if w.focused {
+		w.titleBar.SetBackground(w.style.ActiveTitleBackground)
+		w.titleLabel.Font.Color = w.style.ActiveTitleForeground
+	} else {
+		w.titleBar.SetBackground(w.style.InactiveTitleBackground)
+		w.titleLabel.Font.Color = w.style.InactiveTitleForeground
+	}
 }
 
 // setupTitlebar creates the title bar frame of the window.
@@ -260,12 +279,12 @@ func (w *Window) SetFocus(v bool) {
 
 	// Update the title bar colors.
 	var (
-		bg = w.ActiveTitleBackground
-		fg = w.ActiveTitleForeground
+		bg = w.style.ActiveTitleBackground
+		fg = w.style.ActiveTitleForeground
 	)
 	if !w.focused {
-		bg = w.InactiveTitleBackground
-		fg = w.InactiveTitleForeground
+		bg = w.style.InactiveTitleBackground
+		fg = w.style.InactiveTitleForeground
 	}
 	w.titleBar.SetBackground(bg)
 	w.titleLabel.Font.Color = fg

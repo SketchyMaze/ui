@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"git.kirsle.net/go/render"
+	"git.kirsle.net/go/ui/style"
 )
 
 // DefaultFont is the default font settings used for a Label.
@@ -23,6 +24,7 @@ type Label struct {
 	IntVariable  *int
 	Font         render.Text
 
+	style      *style.Label
 	width      int
 	height     int
 	lineHeight int
@@ -36,6 +38,7 @@ func NewLabel(c Label) *Label {
 		IntVariable:  c.IntVariable,
 		Font:         DefaultFont,
 	}
+	w.SetStyle(Theme.Label)
 	if !c.Font.IsZero() {
 		w.Font = c.Font
 	}
@@ -43,6 +46,17 @@ func NewLabel(c Label) *Label {
 		return fmt.Sprintf(`Label<"%s">`, w.text().Text)
 	})
 	return w
+}
+
+// SetStyle sets the label's default style.
+func (w *Label) SetStyle(v *style.Label) {
+	if v == nil {
+		v = &style.DefaultLabel
+	}
+
+	w.style = v
+	w.SetBackground(w.style.Background)
+	w.Font.Color = w.style.Foreground
 }
 
 // text returns the label's displayed text, coming from the TextVariable if

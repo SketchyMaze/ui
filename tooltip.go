@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"git.kirsle.net/go/render"
+	"git.kirsle.net/go/ui/style"
 )
 
 func init() {
@@ -20,6 +21,7 @@ type Tooltip struct {
 	TextVariable *string // String pointer instead of text.
 	Edge         Edge    // side to display tooltip on
 
+	style      *style.Tooltip
 	target     Widget
 	lineHeight int
 	font       render.Text
@@ -74,7 +76,20 @@ func NewTooltip(target Widget, tt Tooltip) *Tooltip {
 		return fmt.Sprintf(`Tooltip<"%s">`, w.Value())
 	})
 
+	w.SetStyle(Theme.Tooltip)
+
 	return w
+}
+
+// SetStyle sets the tooltip's default style.
+func (w *Tooltip) SetStyle(v *style.Tooltip) {
+	if v == nil {
+		v = &style.DefaultTooltip
+	}
+
+	w.style = v
+	w.SetBackground(w.style.Background)
+	w.font.Color = w.style.Foreground
 }
 
 // Value returns the current text displayed in the tooltop, whether from the

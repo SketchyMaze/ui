@@ -5,13 +5,14 @@ import (
 	"fmt"
 
 	"git.kirsle.net/go/render"
-	"git.kirsle.net/go/ui/theme"
+	"git.kirsle.net/go/ui/style"
 )
 
 // Button is a clickable button.
 type Button struct {
 	BaseWidget
 	child Widget
+	style *style.Button
 
 	// Private options.
 	hovering bool
@@ -22,27 +23,28 @@ type Button struct {
 func NewButton(name string, child Widget) *Button {
 	w := &Button{
 		child: child,
+		style: &style.DefaultButton,
 	}
 	w.IDFunc(func() string {
 		return fmt.Sprintf("Button<%s>", name)
 	})
 
-	w.Configure(Config{
-		BorderSize:   2,
-		BorderStyle:  BorderRaised,
-		OutlineSize:  1,
-		OutlineColor: theme.ButtonOutlineColor,
-		Background:   theme.ButtonBackgroundColor,
-	})
+	w.SetStyle(Theme.Button)
 
 	w.Handle(MouseOver, func(e EventData) error {
 		w.hovering = true
-		w.SetBackground(theme.ButtonHoverColor)
+		w.SetBackground(w.style.HoverBackground)
+		if label, ok := w.child.(*Label); ok {
+			label.Font.Color = w.style.HoverForeground
+		}
 		return nil
 	})
 	w.Handle(MouseOut, func(e EventData) error {
 		w.hovering = false
-		w.SetBackground(theme.ButtonBackgroundColor)
+		w.SetBackground(w.style.Background)
+		if label, ok := w.child.(*Label); ok {
+			label.Font.Color = w.style.Foreground
+		}
 		return nil
 	})
 
@@ -53,11 +55,32 @@ func NewButton(name string, child Widget) *Button {
 	})
 	w.Handle(MouseUp, func(e EventData) error {
 		w.clicked = false
-		w.SetBorderStyle(BorderRaised)
+		w.SetBorderStyle(BorderStyle(w.style.BorderStyle))
 		return nil
 	})
 
 	return w
+}
+
+// SetStyle sets the button style.
+func (w *Button) SetStyle(v *style.Button) {
+	if v == nil {
+		v = &style.DefaultButton
+	}
+
+	w.style = v
+	w.Configure(Config{
+		BorderSize:   w.style.BorderSize,
+		BorderStyle:  BorderStyle(w.style.BorderStyle),
+		OutlineSize:  w.style.OutlineSize,
+		OutlineColor: w.style.OutlineColor,
+		Background:   w.style.Background,
+	})
+
+	// If the child is a Label, apply the foreground color.
+	if label, ok := w.child.(*Label); ok {
+		label.Font.Color = w.style.Foreground
+	}
 }
 
 // Children returns the button's child widget.
