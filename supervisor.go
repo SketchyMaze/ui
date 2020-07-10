@@ -265,7 +265,7 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
 	// the bounding box of the active focused window. Prevents clicking "thru"
 	// the window and activating widgets/other windows behind it.
 	var cursorInsideFocusedWindow bool
-	if !toFocusedWindow && s.winFocus != nil {
+	if !toFocusedWindow && s.winFocus != nil && !s.winFocus.window.Hidden() {
 		// Get the bounding box of the focused window.
 		if XY.Inside(AbsoluteRect(s.winFocus.window)) {
 			cursorInsideFocusedWindow = true

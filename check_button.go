@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"git.kirsle.net/go/render"
-	"git.kirsle.net/go/ui/theme"
 )
 
 // CheckButton implements a checkbox and radiobox widget. It's based on a
@@ -28,6 +27,8 @@ func NewCheckButton(name string, boolVar *bool, child Widget) *CheckButton {
 		return fmt.Sprintf("CheckButton<%s %+v>", name, w.BoolVar)
 	})
 
+	w.SetStyle(Theme.Button)
+
 	w.setup()
 	return w
 }
@@ -42,6 +43,9 @@ func NewRadioButton(name string, stringVar *string, value string, child Widget) 
 	w.IDFunc(func() string {
 		return fmt.Sprintf(`RadioButton<%s "%s" %s>`, name, w.Value, strconv.FormatBool(*w.StringVar == w.Value))
 	})
+
+	w.SetStyle(Theme.Button)
+
 	w.setup()
 	return w
 }
@@ -63,10 +67,14 @@ func (w *CheckButton) Compute(e render.Engine) {
 
 // setup the common things between checkboxes and radioboxes.
 func (w *CheckButton) setup() {
-	var borderStyle BorderStyle = BorderRaised
+	var (
+		borderStyle BorderStyle = BorderRaised
+		background              = w.style.Background
+	)
 	if w.BoolVar != nil {
 		if *w.BoolVar == true {
 			borderStyle = BorderSunken
+			background = w.style.Background.Darken(40)
 		}
 	}
 
@@ -74,18 +82,31 @@ func (w *CheckButton) setup() {
 		BorderSize:   2,
 		BorderStyle:  borderStyle,
 		OutlineSize:  1,
-		OutlineColor: theme.ButtonOutlineColor,
-		Background:   theme.ButtonBackgroundColor,
+		OutlineColor: w.style.OutlineColor,
+		Background:   background,
 	})
 
 	w.Handle(MouseOver, func(ed EventData) error {
 		w.hovering = true
-		w.SetBackground(theme.ButtonHoverColor)
+		w.SetBackground(w.style.HoverBackground)
 		return nil
 	})
 	w.Handle(MouseOut, func(ed EventData) error {
 		w.hovering = false
-		w.SetBackground(theme.ButtonBackgroundColor)
+
+		var sunken bool
+		if w.BoolVar != nil {
+			sunken = *w.BoolVar == true
+		} else if w.StringVar != nil {
+			sunken = *w.StringVar == w.Value
+		}
+
+		if sunken {
+			w.SetBackground(w.style.Background.Darken(40))
+		} else {
+			w.SetBackground(w.style.Background)
+		}
+
 		return nil
 	})
 
@@ -115,9 +136,12 @@ func (w *CheckButton) setup() {
 
 		if sunken {
 			w.SetBorderStyle(BorderSunken)
+			w.SetBackground(w.style.Background.Darken(40))
 		} else {
 			w.SetBorderStyle(BorderRaised)
+			w.SetBackground(w.style.Background)
 		}
+
 		return nil
 	})
 }

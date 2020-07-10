@@ -338,9 +338,9 @@ func (w *Window) Place(child Widget, config Place) {
 	w.content.Place(child, config)
 }
 
-// TitleBar returns the title bar widget.
-func (w *Window) TitleBar() *Frame {
-	return w.titleBar
+// TitleBar returns the title bar widgets.
+func (w *Window) TitleBar() (*Frame, *Label) {
+	return w.titleBar, w.titleLabel
 }
 
 // Configure the widget. Color and style changes are passed down to the inner
