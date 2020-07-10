@@ -133,6 +133,8 @@ most complex.
   * Works the same as CheckButton and RadioButton but draws a separate
     label next to a small check button. Clicking the label will toggle the
     state of the checkbox.
+* [x] **Pager**: a series of numbered buttons to use with a paginated UI.
+  Includes "Forward" and "Next" buttons and buttons for each page number.
 * [x] **Window**: a Frame with a title bar Frame on top.
   * Can be managed by Supervisor to give Window Manager controls to it
     (drag it by its title bar, Close button, window focus, multiple overlapping
