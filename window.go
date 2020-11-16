@@ -315,6 +315,12 @@ func (w *Window) SetMaximized(v bool) {
 	}
 }
 
+// Size returns the window's size (the size of its underlying body frame,
+// including its title bar and content frames).
+func (w *Window) Size() render.Rect {
+	return w.body.Size()
+}
+
 // Close the window, hiding it from display and calling its CloseWindow handler.
 func (w *Window) Close() {
 	w.Hide()
