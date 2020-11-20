@@ -11,12 +11,15 @@ import (
 type Pager struct {
 	BaseWidget
 
-	// Config settings.
-	Page     int // default 1
-	Pages    int
-	PerPage  int // default 20
-	Font     render.Text
-	OnChange func(page, perPage int)
+	// Config settings. NOTE: these are copied in the constructor,
+	// be sure to update it there too if you add a new option!
+	Name           string // totally optional name
+	Page           int    // default 1
+	Pages          int
+	PerPage        int // default 20
+	MaxPageButtons int // max no. of individual pages to show, 0 = no limit
+	Font           render.Text
+	OnChange       func(page, perPage int)
 
 	supervisor *Supervisor
 	child      Widget
@@ -31,12 +34,13 @@ type Pager struct {
 // NewPager creates a new Pager.
 func NewPager(config Pager) *Pager {
 	w := &Pager{
-		Page:     config.Page,
-		Pages:    config.Pages,
-		PerPage:  config.PerPage,
-		Font:     config.Font,
-		OnChange: config.OnChange,
-		buttons:  []Widget{},
+		Page:           config.Page,
+		Pages:          config.Pages,
+		PerPage:        config.PerPage,
+		MaxPageButtons: config.MaxPageButtons,
+		Font:           config.Font,
+		OnChange:       config.OnChange,
+		buttons:        []Widget{},
 	}
 
 	// default settings
@@ -92,6 +96,18 @@ func (w *Pager) setup() *Frame {
 	// Draw the numbered buttons.
 	for i := 1; i <= w.Pages; i++ {
 		page := fmt.Sprintf("%d", i)
+
+		if w.MaxPageButtons > 0 {
+			if i > w.MaxPageButtons {
+				break
+			}
+
+			// The final button shown; make this one always reflect the
+			// current page IF the current page is greater than this one.
+			if w.Page >= i && w.Page != i {
+				continue
+			}
+		}
 
 		btn := NewRadioButton(
 			"Page "+page,
