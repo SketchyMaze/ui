@@ -99,7 +99,10 @@ func (w *Frame) Present(e render.Engine, P render.Point) {
 
 	// Draw the widgets.
 	for _, child := range w.widgets {
-		// child.Compute(e)
+		if child.Hidden() {
+			continue
+		}
+
 		p := child.Point()
 		moveTo := render.NewPoint(
 			P.X+p.X+w.BoxThickness(1),
