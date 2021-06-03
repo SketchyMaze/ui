@@ -44,8 +44,9 @@ func main() {
 			Padding:      4,
 		},
 	}))
-	button.Handle(ui.Click, func(ed ui.EventData) {
+	button.Handle(ui.Click, func(ed ui.EventData) error {
 		fmt.Println("I've been clicked!")
+		return nil
 	})
 	mw.Pack(button, ui.Pack{
 		Side: ui.N,

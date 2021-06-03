@@ -27,6 +27,9 @@ requests are accepted on GitHub.
 
 # Example
 
+See the [eg/](https://git.kirsle.net/go/ui/src/branch/master/eg) directory
+in this git repository for several example programs and screenshots.
+
 ```go
 package main
 

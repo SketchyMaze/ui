@@ -132,8 +132,9 @@ func CreateButtons(window *ui.MainWindow, parent *ui.Frame) {
 		}))
 
 		// When clicked, change the window title to ID this button.
-		button.Handle(ui.Click, func(ed ui.EventData) {
+		button.Handle(ui.Click, func(ed ui.EventData) error {
 			window.SetTitle(parent.Name + ": " + setting.Label)
+			return nil
 		})
 
 		// Tooltip for it.

@@ -1,5 +1,7 @@
 # Menu Example
 
+![Screenshot](screenshot.png)
+
 This example shows off the Menu, MenuButton, and MenuBar widgets.
 
 * MenuButton is your basic button that pops up a Menu when clicked.
