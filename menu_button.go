@@ -88,7 +88,7 @@ func (w *MenuButton) Compute(e render.Engine) {
 func (w *MenuButton) positionMenu(e render.Engine) {
 	var (
 		// Position and size of the MenuButton button.
-		buttonPoint = w.Point()
+		buttonPoint = AbsolutePosition(w)
 		buttonSize  = w.Size()
 
 		// Size of the actual desktop window.
