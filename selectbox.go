@@ -115,7 +115,7 @@ func (w *SelectBox) AddItem(label string, value interface{}, f func()) {
 
 // TODO: RemoveItem()
 
-// Value returns the currently selected item in the SelectBox.
+// GetValue returns the currently selected item in the SelectBox.
 //
 // Returns the SelectValue and true on success, and the Label or underlying Value
 // can be read from the SelectValue struct. If no valid option is selected, the
@@ -128,6 +128,28 @@ func (w *SelectBox) GetValue() (SelectValue, bool) {
 	}
 
 	return SelectValue{}, false
+}
+
+// SetValueByLabel sets the currently selected option to the given label.
+func (w *SelectBox) SetValueByLabel(label string) bool {
+	for _, option := range w.values {
+		if option.Label == label {
+			w.textVariable = option.Label
+			return true
+		}
+	}
+	return false
+}
+
+// SetValue sets the currently selected option to the given value.
+func (w *SelectBox) SetValue(value interface{}) bool {
+	for _, option := range w.values {
+		if option.Value == value {
+			w.textVariable = option.Label
+			return true
+		}
+	}
+	return false
 }
 
 // Compute to re-evaluate the button state (in the case of radio buttons where
