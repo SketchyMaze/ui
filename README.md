@@ -8,14 +8,14 @@ applications (SDL2, for Linux, MacOS and Windows) as well as web browsers
 
 ![Screenshot](docs/guitest.png)
 
-> _(Screenshot is from Project: Doodle's GUITest debug screen showing a_
+> _(Screenshot is from Sketchy Maze's GUITest debug screen showing a_
 > _Window, several Frames, Labels, Buttons and a Checkbox widget.)_
 
 It is very much a **work in progress** and may contain bugs and its API may
 change as bugs are fixed or features added.
 
 This library is being developed in conjunction with my drawing-based maze
-game, [Project: Doodle](https://www.kirsle.net/doodle). The rendering engine
+game, [Sketchy Maze](https://www.sketchymaze.com). The rendering engine
 library is at [go/render](https://git.kirsle.net/go/render) which provides
 the SDL2 and Canvas back-ends.
 (GitHub mirror: [kirsle/render](https://github.com/kirsle/render))
@@ -148,13 +148,13 @@ most complex.
   provides a simple API to add menus and items to it.
 * [x] **Menu**: a frame full of clickable links and separators. Usually used as
   a modal pop-up by the MenuButton and MenuBar.
+* [x] **SelectBox**: a kind of MenuButton that lets the user choose a
+  value from a list of possible values.
 
 **Work in progress widgets:**
 
 * [ ] **Scrollbar**: a Frame including a trough, scroll buttons and a
   draggable slider.
-* [ ] **SelectBox:** a kind of MenuButton that lets the user choose a value
-  from a list of possible values, bound to a string variable.
 
 **Wish list for the longer-term future:**
 

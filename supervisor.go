@@ -37,6 +37,9 @@ const (
 	// Lifecycle event handlers.
 	Compute // fired whenever the widget runs Compute
 	Present // fired whenever the widget runs Present
+
+	// Form field events.
+	Change
 )
 
 // EventData carries common data to event handlers.

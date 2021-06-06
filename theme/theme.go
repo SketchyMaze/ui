@@ -10,6 +10,7 @@ var (
 	ButtonBackgroundColor = render.RGBA(200, 200, 200, 255)
 	ButtonHoverColor      = render.RGBA(200, 255, 255, 255)
 	ButtonOutlineColor    = render.Black
+	InputBackgroundColor  = render.White
 
 	BorderColorOffset = 40
 )

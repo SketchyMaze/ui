@@ -46,6 +46,20 @@ func NewImage(c Image) *Image {
 	return w
 }
 
+// ImageFromImage creates an Image from a Go standard library image.Image.
+func ImageFromImage(e render.Engine, im image.Image) (*Image, error) {
+	tex, err := e.StoreTexture("imgbin.png", im)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Image{
+		Type: PNG,
+		Image: im,
+		texture: tex,
+	}, nil
+}
+
 // ImageFromTexture creates an Image from a texture.
 func ImageFromTexture(tex render.Texturer) *Image {
 	return &Image{
