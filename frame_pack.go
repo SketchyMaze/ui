@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	"git.kirsle.net/go/render"
 )
 
@@ -54,6 +56,34 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 		pack:   C,
 	})
 	w.Add(child)
+}
+
+// Unpack removes the widget from the packed lists.
+func (w *Frame) Unpack(child Widget) bool {
+	var any = false
+	for side, widgets := range w.packs {
+		var (
+			replace = []packedWidget{}
+			found   = false
+		)
+
+		fmt.Printf("unpack:%s side:%s\n", child, side)
+
+		for _, widget := range widgets {
+			if widget.widget == child {
+				fmt.Printf("found!\n")
+				found = true
+				any = true
+				continue
+			}
+			replace = append(replace, widget)
+		}
+
+		if found {
+			w.packs[side] = replace
+		}
+	}
+	return any
 }
 
 // computePacked processes all the Pack layout widgets in the Frame.

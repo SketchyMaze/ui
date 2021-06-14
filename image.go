@@ -54,8 +54,8 @@ func ImageFromImage(e render.Engine, im image.Image) (*Image, error) {
 	}
 
 	return &Image{
-		Type: PNG,
-		Image: im,
+		Type:    PNG,
+		Image:   im,
 		texture: tex,
 	}, nil
 }
@@ -64,6 +64,7 @@ func ImageFromImage(e render.Engine, im image.Image) (*Image, error) {
 func ImageFromTexture(tex render.Texturer) *Image {
 	return &Image{
 		texture: tex,
+		Image:   tex.Image(),
 	}
 }
 

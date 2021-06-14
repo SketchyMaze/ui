@@ -11,19 +11,20 @@ import (
 type SelectBox struct {
 	MenuButton
 
-	name       string
+	name string
 
 	// Configurables after SelectBox creation.
 	AlwaysChange bool // always call the Change event, even if selection not changed.
-	
+
 	// Child widgets specific to the SelectBox.
-	frame *Frame
-	label *Label
-	arrow *Image
+	frame     *Frame
+	label     *Label
+	arrow     *Image
+	showImage *Image // User override show image
 
 	// Data storage.
 	textVariable string
-	values []SelectValue
+	values       []SelectValue
 }
 
 // SelectValue holds a mapping between a text label for a SelectBox and
@@ -40,9 +41,9 @@ type SelectValue struct {
 // all be ignored, as SelectBox will handle the values internally.
 func NewSelectBox(name string, withLabel Label) *SelectBox {
 	w := &SelectBox{
-		name: name,
+		name:         name,
 		textVariable: "Choose one",
-		values: []SelectValue{},
+		values:       []SelectValue{},
 	}
 
 	// Ensure the label has no text of its own.
@@ -63,9 +64,9 @@ func NewSelectBox(name string, withLabel Label) *SelectBox {
 
 	// Configure the button's appearance.
 	w.Button.Configure(Config{
-		BorderSize: 2,
+		BorderSize:  2,
 		BorderStyle: BorderSunken,
-		Background: render.White,
+		Background:  render.White,
 	})
 
 	// Set sensible default padding on the label.
@@ -80,6 +81,34 @@ func NewSelectBox(name string, withLabel Label) *SelectBox {
 
 	w.setup()
 	return w
+}
+
+// SetImage sets the selectbox button to show the image instead of its
+// normal text label. If the image corresponds with an option in the selectbox,
+// it is up to the caller to call SetImage on change and set the right image here.
+//
+// Provide a nil value to remove the image and show the text labels instead.
+func (w *SelectBox) SetImage(img *Image) {
+	// Get rid of the current image.
+	if w.showImage != nil {
+		w.showImage.Hide()
+		w.frame.Unpack(w.showImage)
+	}
+
+	// Are we getting a new one?
+	if img != nil {
+		w.label.Hide()
+		w.frame.Pack(img, Pack{
+			Side: W,
+		})
+	} else {
+		w.label.Show()
+	}
+
+	w.showImage = img
+	if w.showImage != nil {
+		w.showImage.Show()
+	}
 }
 
 // AddItem adds a new option to the SelectBox's menu.
@@ -197,4 +226,3 @@ func (w *SelectBox) setup() {
 		return nil
 	})
 }
-
