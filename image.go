@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"image"
 	"image/jpeg"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"git.kirsle.net/go/render"
+	"golang.org/x/image/bmp"
 )
 
 // ImageType for supported image formats.
@@ -27,8 +29,8 @@ type Image struct {
 
 	// Configurable fields for the constructor.
 	Type    ImageType
-	Image   image.Image
-	texture render.Texturer
+	Image   image.Image     // a Go image version
+	texture render.Texturer // (SDL2) Texture, lazy inited on Present.
 }
 
 // NewImage creates a new Image.
@@ -47,16 +49,10 @@ func NewImage(c Image) *Image {
 }
 
 // ImageFromImage creates an Image from a Go standard library image.Image.
-func ImageFromImage(e render.Engine, im image.Image) (*Image, error) {
-	tex, err := e.StoreTexture("imgbin.png", im)
-	if err != nil {
-		return nil, err
-	}
-
+func ImageFromImage(im image.Image) (*Image, error) {
 	return &Image{
-		Type:    PNG,
-		Image:   im,
-		texture: tex,
+		Type:  PNG,
+		Image: im,
 	}, nil
 }
 
@@ -69,7 +65,7 @@ func ImageFromTexture(tex render.Texturer) *Image {
 }
 
 // ImageFromFile creates an Image by opening a file from disk.
-func ImageFromFile(e render.Engine, filename string) (*Image, error) {
+func ImageFromFile(filename string) (*Image, error) {
 	fh, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -80,14 +76,8 @@ func ImageFromFile(e render.Engine, filename string) (*Image, error) {
 		return nil, err
 	}
 
-	tex, err := e.StoreTexture(filename, img)
-	if err != nil {
-		return nil, err
-	}
-
 	return &Image{
-		Image:   img,
-		texture: tex,
+		Image: img,
 	}, nil
 }
 
@@ -109,12 +99,34 @@ func OpenImage(e render.Engine, filename string) (*Image, error) {
 		return nil, fmt.Errorf("OpenImage: %s: not a supported image type", filename)
 	}
 
-	tex, err := e.LoadTexture(filename)
+	// Open the file from disk.
+	fh, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	w.texture = tex
+	// Parse it.
+	switch w.Type {
+	case PNG:
+		img, err := png.Decode(fh)
+		if err != nil {
+			return nil, err
+		}
+		w.Image = img
+	case JPEG:
+		img, err := jpeg.Decode(fh)
+		if err != nil {
+			return nil, err
+		}
+		w.Image = img
+	case BMP:
+		img, err := bmp.Decode(fh)
+		if err != nil {
+			return nil, err
+		}
+		w.Image = img
+	}
+
 	return w, nil
 }
 
@@ -131,16 +143,39 @@ func (w *Image) GetRGBA() *image.RGBA {
 	return rgba
 }
 
-// Compute the widget.
-func (w *Image) Compute(e render.Engine) {
-	w.Resize(w.texture.Size())
-
-	// Call the BaseWidget Compute in case we have subscribers.
-	w.BaseWidget.Compute(e)
+// Size returns the dimensions of the image which is also the widget's size.
+func (w *Image) Size() render.Rect {
+	if w.Image != nil {
+		bounds := w.Image.Bounds().Canon()
+		return render.Rect{
+			W: bounds.Max.X,
+			H: bounds.Max.Y,
+		}
+	}
+	return w.BaseWidget.Size()
 }
 
-// Present the widget.
+// Counter for unique SDL2 texture names.
+var __imageID int
+
+// Present the widget. This should be called on your main thread
+// if using SDL2 in case it needs to generate textures.
 func (w *Image) Present(e render.Engine, p render.Point) {
+	// Lazy load the (e.g. SDL2) texture from the stored bitmap.
+	if w.texture == nil {
+		if w.Image == nil {
+			return
+		}
+
+		__imageID++
+		tex, err := e.StoreTexture(fmt.Sprintf("ui.Image(%d).png", __imageID), w.Image)
+		if err != nil {
+			fmt.Printf("ui.Image.Present(): could not make texture: %s\n", err)
+			return
+		}
+		w.texture = tex
+	}
+
 	size := w.texture.Size()
 	dst := render.Rect{
 		X: p.X,
