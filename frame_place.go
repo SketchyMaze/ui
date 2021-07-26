@@ -54,6 +54,8 @@ func (w *Frame) Place(child Widget, config Place) {
 func (w *Frame) computePlaced(e render.Engine) {
 	var (
 		frameSize = w.BoxSize()
+		// maxWidth int
+		// maxHeight int
 	)
 
 	for _, row := range w.placed {

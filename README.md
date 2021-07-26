@@ -113,6 +113,7 @@ most complex.
   * Place() lets you place child widgets relative to the parent. You can place
     it at an exact Point, or against the Top, Left, Bottom or Right sides, or
     aligned to the Center (horizontal) or Middle (vertical) of the parent.
+    [Example](eg/frame-place)
 * [x] **Label**: Textual labels for your UI.
   * Supports TrueType fonts, color, stroke, drop shadow, font size, etc.
   * Variable binding support: TextVariable or IntVariable can point to a
@@ -136,18 +137,20 @@ most complex.
   * Works the same as CheckButton and RadioButton but draws a separate
     label next to a small check button. Clicking the label will toggle the
     state of the checkbox.
+* [x] **TabFrame:** a collection of Frames navigated between using a row
+  of tab buttons along their top edge. [Example](eg/tabframe).
 * [x] **Pager**: a series of numbered buttons to use with a paginated UI.
   Includes "Forward" and "Next" buttons and buttons for each page number.
 * [x] **Window**: a Frame with a title bar Frame on top.
   * Can be managed by Supervisor to give Window Manager controls to it
     (drag it by its title bar, Close button, window focus, multiple overlapping
-    windows, and so on).
-* [x] **Tooltip**: a mouse hover label attached to a widget.
+    windows, and so on). [Example](eg/windows)
+* [x] **Tooltip**: a mouse hover label attached to a widget. [Example](eg/tooltip)
 * [x] **MenuButton**: a button that opens a modal pop-up menu on click.
 * [x] **MenuBar**: a specialized Frame that groups a bunch of MenuButtons and
   provides a simple API to add menus and items to it.
 * [x] **Menu**: a frame full of clickable links and separators. Usually used as
-  a modal pop-up by the MenuButton and MenuBar.
+  a modal pop-up by the MenuButton and MenuBar. [Example](eg/menus)
 * [x] **SelectBox**: a kind of MenuButton that lets the user choose a
   value from a list of possible values.
 

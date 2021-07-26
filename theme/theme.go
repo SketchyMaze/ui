@@ -17,25 +17,37 @@ var (
 
 // Theme is a collection of styles for various built-in widgets.
 type Theme struct {
-	Name    string
-	Window  *style.Window
-	Label   *style.Label
-	Button  *style.Button
-	Tooltip *style.Tooltip
+	Name     string
+	Window   *style.Window
+	Label    *style.Label
+	Button   *style.Button
+	Tooltip  *style.Tooltip
+	TabFrame *style.Button
 }
 
 // Default theme.
 var Default = Theme{
-	Name:    "Default",
-	Label:   &style.DefaultLabel,
-	Button:  &style.DefaultButton,
-	Tooltip: &style.DefaultTooltip,
+	Name:     "Default",
+	Label:    &style.DefaultLabel,
+	Button:   &style.DefaultButton,
+	Tooltip:  &style.DefaultTooltip,
+	TabFrame: &style.DefaultButton,
 }
 
 // DefaultFlat is a flat version of the default theme.
 var DefaultFlat = Theme{
 	Name: "DefaultFlat",
 	Button: &style.Button{
+		Background:      style.DefaultButton.Background,
+		Foreground:      style.DefaultButton.Foreground,
+		OutlineColor:    style.DefaultButton.OutlineColor,
+		OutlineSize:     1,
+		HoverBackground: style.DefaultButton.HoverBackground,
+		HoverForeground: style.DefaultButton.HoverForeground,
+		BorderStyle:     style.BorderSolid,
+		BorderSize:      2,
+	},
+	TabFrame: &style.Button{
 		Background:      style.DefaultButton.Background,
 		Foreground:      style.DefaultButton.Foreground,
 		OutlineColor:    style.DefaultButton.OutlineColor,
@@ -73,5 +85,14 @@ var DefaultDark = Theme{
 	Tooltip: &style.Tooltip{
 		Background: render.RGBA(60, 60, 60, 230),
 		Foreground: render.Cyan,
+	},
+	TabFrame: &style.Button{
+		Background:      render.DarkGrey,
+		Foreground:      render.Grey,
+		OutlineColor:    render.DarkGrey,
+		OutlineSize:     1,
+		HoverBackground: render.Grey,
+		BorderStyle:     style.BorderRaised,
+		BorderSize:      2,
 	},
 }

@@ -341,7 +341,7 @@ func (w *Window) Pack(child Widget, config ...Pack) {
 
 // Place a child widget into the window's main frame.
 func (w *Window) Place(child Widget, config Place) {
-	w.content.Place(child, config)
+	w.body.Place(child, config)
 }
 
 // TitleBar returns the title bar widgets.
@@ -356,6 +356,14 @@ func (w *Window) Configure(C Config) {
 	w.body.Configure(C)
 
 	// Don't pass dimensions down any further than the body.
+	// TODO: this causes the content frame to compute its size
+	// dynamically based on Packed widgets, but if using Place on
+	// your window, the content frame doesn't know a size by which
+	// to place the child relative to (Frame has size 0x0).
+	// Commenting out these two lines causes windows to render very
+	// incorrectly (child frame content flying off the window bottom).
+	// In the meantime, Window.Place intercepts it and draws it onto
+	// the parent window directly so it works how you expect.
 	C.Width = 0
 	C.Height = 0
 	w.content.Configure(C)
@@ -364,6 +372,11 @@ func (w *Window) Configure(C Config) {
 // ConfigureTitle configures the title bar widget.
 func (w *Window) ConfigureTitle(C Config) {
 	w.titleBar.Configure(C)
+}
+
+// ContentFrame returns the main content Frame of this window.
+func (w *Window) ContentFrame() *Frame {
+	return w.content
 }
 
 // Compute the window.

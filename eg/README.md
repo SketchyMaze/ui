@@ -14,3 +14,5 @@ screenshot and description:
 * [Menus](menus/): demonstrates various Menu Buttons and a Menu Bar.
 * [Themes](themes/): a UI demo that shows off the Default, Flat, and Dark UI
   themes as part of experimental theming support.
+* [TabFrame](tabframe/): demo for the TabFrame widget showing multiple Windows
+  with tabbed interfaces.

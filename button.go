@@ -11,8 +11,13 @@ import (
 // Button is a clickable button.
 type Button struct {
 	BaseWidget
+	Name  string
 	child Widget
 	style *style.Button
+
+	// Set this true to hard-set a color for this button;
+	// it will not adjust on mouse-over or press.
+	FixedColor bool
 
 	// Private options.
 	hovering bool
@@ -22,28 +27,33 @@ type Button struct {
 // NewButton creates a new Button.
 func NewButton(name string, child Widget) *Button {
 	w := &Button{
+		Name:  name,
 		child: child,
 		style: &style.DefaultButton,
 	}
 	w.IDFunc(func() string {
-		return fmt.Sprintf("Button<%s>", name)
+		return fmt.Sprintf("Button<%s>", w.Name)
 	})
 
 	w.SetStyle(Theme.Button)
 
 	w.Handle(MouseOver, func(e EventData) error {
 		w.hovering = true
-		w.SetBackground(w.style.HoverBackground)
-		if label, ok := w.child.(*Label); ok {
-			label.Font.Color = w.style.HoverForeground
+		if !w.FixedColor {
+			w.SetBackground(w.style.HoverBackground)
+			if label, ok := w.child.(*Label); ok {
+				label.Font.Color = w.style.HoverForeground
+			}
 		}
 		return nil
 	})
 	w.Handle(MouseOut, func(e EventData) error {
 		w.hovering = false
-		w.SetBackground(w.style.Background)
-		if label, ok := w.child.(*Label); ok {
-			label.Font.Color = w.style.Foreground
+		if !w.FixedColor {
+			w.SetBackground(w.style.Background)
+			if label, ok := w.child.(*Label); ok {
+				label.Font.Color = w.style.Foreground
+			}
 		}
 		return nil
 	})
@@ -81,6 +91,11 @@ func (w *Button) SetStyle(v *style.Button) {
 	if label, ok := w.child.(*Label); ok {
 		label.Font.Color = w.style.Foreground
 	}
+}
+
+// GetStyle gets the button style.
+func (w *Button) GetStyle() *style.Button {
+	return w.style
 }
 
 // Children returns the button's child widget.
