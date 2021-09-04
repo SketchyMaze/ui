@@ -277,6 +277,6 @@ func (w *TabFrame) presentBorders(e render.Engine, P render.Point) {
 		X: bottomLine[0].X + 1,
 		Y: bottomLine[0].Y,
 		W: bounding.W - 2,
-		H: 3,
+		H: 4,
 	})
 }
