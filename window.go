@@ -121,7 +121,7 @@ func (w *Window) setupTitleBar() (*Frame, *Label) {
 		TextVariable: &w.Title,
 		Font: render.Text{
 			Color:   w.ActiveTitleForeground,
-			Size:    10,
+			Size:    11,
 			Stroke:  w.ActiveTitleBackground.Darken(40),
 			Padding: 2,
 		},

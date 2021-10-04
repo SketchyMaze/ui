@@ -15,6 +15,7 @@ type Event int
 const (
 	NullEvent Event = iota
 	MouseOver
+	MouseMove
 	MouseOut
 	MouseDown
 	MouseUp
@@ -350,6 +351,12 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
 			}))
 			s.hovering[id] = nil
 		}
+
+		// Mouse movement. NOTE: it is intentional that this fires on
+		// every tick even if XY was the same as last time.
+		handle(w.Event(MouseMove, EventData{
+			Point: XY,
+		}))
 
 		isClicked, _ := s.clicked[id]
 		if ev.Button1 {
