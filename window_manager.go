@@ -179,6 +179,17 @@ func (s *Supervisor) CloseAllWindows() int {
 	return i
 }
 
+// CloseActiveWindow closes the topmost active window.
+func (s *Supervisor) CloseActiveWindow() bool {
+	var node = s.winFocus
+	if node != nil {
+		node.window.Hide()
+		s.winFocus = node.next
+		return true
+	}
+	return false
+}
+
 // presentWindows draws the windows from bottom to top.
 func (s *Supervisor) presentWindows(e render.Engine) {
 	item := s.winBottom
