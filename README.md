@@ -22,7 +22,7 @@ the SDL2 and Canvas back-ends.
 
 **Notice:** the canonical source repository for this project is at
 [git.kirsle.net/go/ui](https://git.kirsle.net/go/ui) with a mirror available
-on GitHub at [kirsle/ui](https://github.com/kirsle/ui). Issues and pull
+on GitHub at [SketchyMaze/ui](https://github.com/SketchyMaze/ui). Issues and pull
 requests are accepted on GitHub.
 
 # Example
