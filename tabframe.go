@@ -108,6 +108,17 @@ func (w *TabFrame) AddTab(key string, child Widget) *Frame {
 	return frame
 }
 
+// SetTabsHidden can hide the tab buttons and reveal only their frames.
+// It would be up to the caller to SetTab between the frames, using the
+// TabFrame only for placement and tab handling.
+func (w *TabFrame) SetTabsHidden(hidden bool) {
+	if hidden {
+		w.header.Hide()
+	} else {
+		w.header.Show()
+	}
+}
+
 // set the tab style between active and inactive
 func (w *TabFrame) setButtonStyle(button *Button, active bool) {
 	var style = button.GetStyle()
@@ -218,7 +229,7 @@ The tabs are simple Button widgets but drawn with no borders. Instead,
 borders are painted on post-hoc in the Present function.
 */
 func (w *TabFrame) presentBorders(e render.Engine, P render.Point) {
-	if len(w.tabButtons) == 0 {
+	if len(w.tabButtons) == 0 || w.header.Hidden() {
 		return
 	}
 
