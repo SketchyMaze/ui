@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"image"
 	"image/png"
-	"io/ioutil"
 
 	"git.kirsle.net/go/render"
 )
@@ -371,7 +370,7 @@ func MakeColorPickerGradient() image.Image {
 	}
 
 	// debug
-	ioutil.WriteFile("gradient.png", data, 0644)
+	// ioutil.WriteFile("gradient.png", data, 0644)
 
 	image, err := png.Decode(bytes.NewBuffer(data))
 	if err != nil {
