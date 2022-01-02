@@ -75,6 +75,9 @@ type Widget interface {
 
 	// Render the final widget onto the drawing engine.
 	Present(render.Engine, render.Point)
+
+	// Destroy: implement this if you have resources to free up on teardown.
+	Destroy()
 }
 
 // Config holds common base widget configs for quick configuration.
@@ -523,3 +526,6 @@ func (w *BaseWidget) Handle(event Event, fn func(EventData) error) {
 
 // OnMouseOut should be overridden on widgets who want this event.
 func (w *BaseWidget) OnMouseOut(render.Point) {}
+
+// Destroy does nothing on the base widget. Implement it for widgets which need it.
+func (w *BaseWidget) Destroy() {}

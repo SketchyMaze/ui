@@ -173,6 +173,7 @@ func (s *Supervisor) CloseAllWindows() int {
 	)
 	for node != nil {
 		i++
+		node.window.Destroy()
 		node.window.Hide()
 		node = node.next
 	}
@@ -183,8 +184,10 @@ func (s *Supervisor) CloseAllWindows() int {
 func (s *Supervisor) CloseActiveWindow() bool {
 	var node = s.winFocus
 	if node != nil {
+		node.window.Destroy()
 		node.window.Hide()
 		s.winFocus = node.next
+		s.winFocus.window.SetFocus(true)
 		return true
 	}
 	return false

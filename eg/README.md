@@ -16,3 +16,4 @@ screenshot and description:
   themes as part of experimental theming support.
 * [TabFrame](tabframe/): demo for the TabFrame widget showing multiple Windows
   with tabbed interfaces.
+* [ColorPicker](colorpicker/): demo for the ColorPicker widget.

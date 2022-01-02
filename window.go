@@ -321,6 +321,20 @@ func (w *Window) Size() render.Rect {
 	return w.body.Size()
 }
 
+// Resize the window.
+func (w *Window) Resize(size render.Rect) {
+	w.BaseWidget.Resize(size)
+	w.body.Resize(size)
+}
+
+// Center the window on screen by providing your screen (app window) size.
+func (w *Window) Center(width, height int) {
+	w.MoveTo(render.Point{
+		X: (width / 2) - (w.Size().W / 2),
+		Y: (height / 2) - (w.Size().H / 2),
+	})
+}
+
 // Close the window, hiding it from display and calling its CloseWindow handler.
 func (w *Window) Close() {
 	w.Hide()
@@ -394,4 +408,9 @@ func (w *Window) Present(e render.Engine, P render.Point) {
 
 	// Call the BaseWidget Present in case we have subscribers.
 	w.BaseWidget.Present(e, P)
+}
+
+// Destroy hides the window.
+func (w *Window) Destroy() {
+	w.Hide()
 }

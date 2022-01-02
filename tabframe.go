@@ -119,6 +119,13 @@ func (w *TabFrame) SetTabsHidden(hidden bool) {
 	}
 }
 
+// Header returns access to the ui.Frame that holds the tab buttons. Use
+// at your own risk -- the UI arrangement in this Frame is not guaranteed
+// stable.
+func (w *TabFrame) Header() *Frame {
+	return w.header
+}
+
 // set the tab style between active and inactive
 func (w *TabFrame) setButtonStyle(button *Button, active bool) {
 	var style = button.GetStyle()

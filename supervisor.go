@@ -53,6 +53,22 @@ type EventData struct {
 
 	// Supervisor is the reference to the supervisor who sent the event.
 	Supervisor *Supervisor
+
+	// Widget is a reference to the widget receiving the event.
+	Widget Widget
+
+	// Clicked is true if the primary mouse button is down during
+	// a MouseMove
+	Clicked bool
+}
+
+// RelativePoint returns the ed.Point adjusted to be relative to the widget on screen.
+func (ed EventData) RelativePoint() render.Point {
+	if ed.Widget == nil {
+		return render.NewPoint(-1, -1)
+	}
+	abs := AbsolutePosition(ed.Widget)
+	return render.NewPoint(ed.Point.X-abs.X, ed.Point.Y-abs.Y)
 }
 
 // Supervisor keeps track of widgets of interest to notify them about
@@ -151,7 +167,8 @@ func (s *Supervisor) Loop(ev *event.State) error {
 			// The mouse has been released. TODO: make mouse button important?
 			for _, child := range hovering {
 				child.widget.Event(Drop, EventData{
-					Point: XY,
+					Widget: child.widget,
+					Point:  XY,
 				})
 			}
 			s.DragStop()
@@ -159,7 +176,8 @@ func (s *Supervisor) Loop(ev *event.State) error {
 			// If we have a target widget being dragged, send it mouse events.
 			if target := s.dd.Widget(); target != nil {
 				target.Event(DragMove, EventData{
-					Point: XY,
+					Widget: target,
+					Point:  XY,
 				})
 			}
 		}
@@ -347,35 +365,42 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
 		// Cursor has intersected the widget.
 		if _, ok := s.hovering[id]; !ok {
 			handle(w.Event(MouseOver, EventData{
-				Point: XY,
+				Widget: w,
+				Point:  XY,
 			}))
 			s.hovering[id] = nil
 		}
 
-		// Mouse movement. NOTE: it is intentional that this fires on
-		// every tick even if XY was the same as last time.
-		handle(w.Event(MouseMove, EventData{
-			Point: XY,
-		}))
-
-		isClicked, _ := s.clicked[id]
+		isClicked := s.clicked[id]
 		if ev.Button1 {
 			if !isClicked {
 				err := w.Event(MouseDown, EventData{
-					Point: XY,
+					Widget: w,
+					Point:  XY,
 				})
 				handle(err)
 				s.clicked[id] = true
 			}
 		} else if isClicked {
 			handle(w.Event(MouseUp, EventData{
-				Point: XY,
+				Widget: w,
+				Point:  XY,
 			}))
 			handle(w.Event(Click, EventData{
-				Point: XY,
+				Widget: w,
+				Point:  XY,
 			}))
 			delete(s.clicked, id)
 		}
+
+		// Mouse movement. NOTE: it is intentional that this fires on
+		// every tick even if XY was the same as last time.
+		handle(w.Event(MouseMove, EventData{
+			Widget:  w,
+			Point:   XY,
+			Clicked: ev.Button1,
+		}))
+
 	}
 	for _, child := range outside {
 		var (
@@ -394,14 +419,16 @@ func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
 		// Cursor is not intersecting the widget.
 		if _, ok := s.hovering[id]; ok {
 			handle(w.Event(MouseOut, EventData{
-				Point: XY,
+				Widget: w,
+				Point:  XY,
 			}))
 			delete(s.hovering, id)
 		}
 
 		if _, ok := s.clicked[id]; ok {
 			handle(w.Event(MouseUp, EventData{
-				Point: XY,
+				Widget: w,
+				Point:  XY,
 			}))
 			delete(s.clicked, id)
 		}

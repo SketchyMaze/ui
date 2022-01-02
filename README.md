@@ -154,6 +154,13 @@ most complex.
 * [x] **SelectBox**: a kind of MenuButton that lets the user choose a
   value from a list of possible values.
 
+Some useful helper widgets:
+
+* **ColorPicker**: a ui.Window popup that lets the user choose a color value.
+  It shows a graphical gradient they can click on and an ability to enter a
+  custom hexadecimal value by hand (needs assistance from your program).
+  [Example](eg/colorpicker)
+
 **Work in progress widgets:**
 
 * [ ] **Scrollbar**: a Frame including a trough, scroll buttons and a
