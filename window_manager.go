@@ -66,7 +66,6 @@ func (s *Supervisor) addWindow(win *Window) {
 		s.winFocus = &FocusedWindow{
 			window: win,
 		}
-		s.winTop = s.winFocus
 		s.winBottom = s.winFocus
 		win.SetFocus(true)
 	} else {
@@ -138,7 +137,6 @@ func (s *Supervisor) FocusWindow(win *Window) error {
 		s.winFocus = target
 
 		// Fix the top and bottom pointers.
-		s.winTop = s.winFocus
 		if newBottom != nil {
 			s.winBottom = newBottom
 		}
@@ -184,13 +182,44 @@ func (s *Supervisor) CloseAllWindows() int {
 func (s *Supervisor) CloseActiveWindow() bool {
 	var node = s.winFocus
 	if node != nil {
-		node.window.Destroy()
 		node.window.Hide()
-		s.winFocus = node.next
-		s.winFocus.window.SetFocus(true)
-		return true
 	}
-	return false
+
+	// Find the next visible window to focus.
+	for node != nil {
+		if !node.window.Hidden() {
+			s.FocusWindow(node.window)
+			break
+		}
+		node = node.next
+	}
+
+	return true
+}
+
+// PrintWindows is a debug function that walks the window tree and prints them to your console.
+func (s *Supervisor) PrintWindows() {
+	var (
+		node = s.winBottom
+		i    int
+	)
+
+	fmt.Println("From the bottom:")
+	for node != nil {
+		i++
+		fmt.Printf("%d. %s  focused=%+v  hidden=%+v\n", i, node.window, node.window.Focused(), node.window.Hidden())
+		node = node.prev
+	}
+
+	node = s.winFocus
+	i = 0
+
+	fmt.Println("Focus order:")
+	for node != nil {
+		i++
+		fmt.Printf("%d. %s  focused=%+v  hidden=%+v\n", i, node.window, node.window.Focused(), node.window.Hidden())
+		node = node.next
+	}
 }
 
 // presentWindows draws the windows from bottom to top.

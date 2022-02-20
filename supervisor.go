@@ -87,7 +87,6 @@ type Supervisor struct {
 
 	// List of window focus history for Window Manager.
 	winFocus  *FocusedWindow
-	winTop    *FocusedWindow // pointer to top-most window
 	winBottom *FocusedWindow // pointer to bottom-most window
 }
 
