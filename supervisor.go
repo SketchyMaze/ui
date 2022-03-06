@@ -88,6 +88,9 @@ type Supervisor struct {
 	// List of window focus history for Window Manager.
 	winFocus  *FocusedWindow
 	winBottom *FocusedWindow // pointer to bottom-most window
+
+	// Widgets that we should draw on top, such as Tooltips.
+	onTop []Widget
 }
 
 // WidgetSlot holds a widget with a unique ID number in a sorted list.
@@ -103,6 +106,7 @@ func NewSupervisor() *Supervisor {
 		hovering: map[int]interface{}{},
 		clicked:  map[int]bool{},
 		modals:   []Widget{},
+		onTop:    []Widget{},
 		dd:       NewDragDrop(),
 	}
 }
@@ -493,6 +497,16 @@ func (s *Supervisor) Present(e render.Engine) {
 			modal.Present(e, modal.Point())
 		}
 	}
+
+	// Render any "on top" widgets like Tooltips.
+	if len(s.onTop) > 0 {
+		for _, widget := range s.onTop {
+			if widget.Hidden() {
+				continue
+			}
+			widget.Present(e, widget.Point())
+		}
+	}
 }
 
 // Add a widget to be supervised. Has no effect if the widget is already
@@ -560,4 +574,25 @@ func (s *Supervisor) GetModal() Widget {
 		return nil
 	}
 	return s.modals[len(s.modals)-1]
+}
+
+/*
+DrawOnTop gives the Supervisor a widget to manage the presentation of, for
+example the Tooltip.
+
+If you call Supervisor.Present() in your program's main loop, it will draw the
+widgets that it manages, such as Windows, Menus and Tooltips. Call that function
+last in your main loop, and these things are drawn on top of the rest of your
+UI which you had called Present() on prior.
+
+The current draw order of the Supervisor is as follows:
+
+1. Managed windows are drawn in the order of most recently focused on top.
+2. Pop-up modals such as Menus are drawn. Modals have an "event grab" and all
+   mouse events go to them, or clicking outside of them dismisses the modals.
+3. DrawOnTop widgets such as Tooltips that should always be drawn "last" so as
+   not to be overwritten by neighboring widgets.
+*/
+func (s *Supervisor) DrawOnTop(w Widget) {
+	s.onTop = append(s.onTop, w)
 }

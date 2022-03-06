@@ -12,7 +12,11 @@ func init() {
 	precomputeArrows()
 }
 
-// Tooltip attaches a mouse-over popup to another widget.
+/*
+Tooltip attaches a mouse-over popup to another widget.
+
+
+*/
 type Tooltip struct {
 	BaseWidget
 
@@ -20,6 +24,7 @@ type Tooltip struct {
 	Text         string  // Text to show in the tooltip.
 	TextVariable *string // String pointer instead of text.
 	Edge         Edge    // side to display tooltip on
+	supervisor   *Supervisor
 
 	style      *style.Tooltip
 	target     Widget
@@ -68,7 +73,9 @@ func NewTooltip(target Widget, tt Tooltip) *Tooltip {
 		return nil
 	})
 	target.Handle(Present, func(ed EventData) error {
-		w.Present(ed.Engine, w.Point())
+		if w.supervisor == nil {
+			w.Present(ed.Engine, w.Point())
+		}
 		return nil
 	})
 
@@ -79,6 +86,24 @@ func NewTooltip(target Widget, tt Tooltip) *Tooltip {
 	w.SetStyle(Theme.Tooltip)
 
 	return w
+}
+
+/*
+Supervise the tooltip widget. This will put the rendering of this widget under the
+Supervisor's care to be drawn "on top" of all other widgets. Your main loop should
+call the Supervisor.Present() function lastly so that things managed by it (such as
+Windows, Menus and Tooltips) draw on top of everything else.
+
+If you don't call this, the Tooltip by default will present when its attached widget
+presents (if moused over and tooltip is to be visible). This alone is fine in many
+simple use cases, but in a densely packed UI layout and depending on the Edge the
+tooltip draws at, it may get over-drawn by other widgets and not appear "on top."
+*/
+func (w *Tooltip) Supervise(s *Supervisor) {
+	w.supervisor = s
+
+	// Supervisor will manage our presentation and draw us "on top"
+	w.supervisor.DrawOnTop(w)
 }
 
 // SetStyle sets the tooltip's default style.
