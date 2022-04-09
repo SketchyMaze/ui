@@ -171,8 +171,7 @@ func (s *Supervisor) CloseAllWindows() int {
 	)
 	for node != nil {
 		i++
-		node.window.Destroy()
-		node.window.Hide()
+		node.window.Close()
 		node = node.next
 	}
 	return i
@@ -182,7 +181,7 @@ func (s *Supervisor) CloseAllWindows() int {
 func (s *Supervisor) CloseActiveWindow() bool {
 	var node = s.winFocus
 	if node != nil {
-		node.window.Hide()
+		node.window.Close()
 	}
 
 	// Find the next visible window to focus.
