@@ -31,9 +31,17 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 		C = config[0]
 	}
 
+	// Update an already placed widget.
+	for _, current := range w.packs[C.Side] {
+		if current.widget == child {
+			current.pack = C
+			return
+		}
+	}
+
 	// Initialize the pack list for this side?
 	if _, ok := w.packs[C.Side]; !ok {
-		w.packs[C.Side] = []packedWidget{}
+		w.packs[C.Side] = []*packedWidget{}
 	}
 
 	// Padding: if the user only provided Padding add it to both
@@ -51,7 +59,7 @@ func (w *Frame) Pack(child Widget, config ...Pack) {
 	// Adopt the child widget so it can access the Frame.
 	child.SetParent(w)
 
-	w.packs[C.Side] = append(w.packs[C.Side], packedWidget{
+	w.packs[C.Side] = append(w.packs[C.Side], &packedWidget{
 		widget: child,
 		pack:   C,
 	})
@@ -63,7 +71,7 @@ func (w *Frame) Unpack(child Widget) bool {
 	var any = false
 	for side, widgets := range w.packs {
 		var (
-			replace = []packedWidget{}
+			replace = []*packedWidget{}
 			found   = false
 		)
 
@@ -98,8 +106,8 @@ func (w *Frame) computePacked(e render.Engine) {
 		// so we can expand them to fill remaining space in fixed size Frames.
 		maxWidth  int
 		maxHeight int
-		visited   = []packedWidget{}
-		expanded  = []packedWidget{}
+		visited   = []*packedWidget{}
+		expanded  = []*packedWidget{}
 	)
 
 	// Iterate through all directions and compute how much space to

@@ -13,8 +13,8 @@ type Frame struct {
 	BaseWidget
 
 	// Widget placement settings.
-	packs   map[Side][]packedWidget // Packed widgets
-	placed  []placedWidget          // Placed widgets
+	packs   map[Side][]*packedWidget // Packed widgets
+	placed  []*placedWidget          // Placed widgets
 	widgets []Widget
 }
 
@@ -22,7 +22,7 @@ type Frame struct {
 func NewFrame(name string) *Frame {
 	w := &Frame{
 		Name:    name,
-		packs:   map[Side][]packedWidget{},
+		packs:   map[Side][]*packedWidget{},
 		widgets: []Widget{},
 	}
 	w.SetBackground(render.RGBA(1, 0, 0, 0)) // invisible default BG
@@ -37,7 +37,7 @@ func NewFrame(name string) *Frame {
 // Setup ensures all the Frame's data is initialized and not null.
 func (w *Frame) Setup() {
 	if w.packs == nil {
-		w.packs = map[Side][]packedWidget{}
+		w.packs = map[Side][]*packedWidget{}
 	}
 	if w.widgets == nil {
 		w.widgets = []Widget{}

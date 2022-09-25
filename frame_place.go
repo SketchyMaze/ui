@@ -37,9 +37,18 @@ type placedWidget struct {
 	place  Place
 }
 
-// Place a widget into the frame.
+// Place a widget into the frame. You may call Place on a widget multiple times to update its configuration.
 func (w *Frame) Place(child Widget, config Place) {
-	w.placed = append(w.placed, placedWidget{
+	// Update an already placed widget.
+	for _, current := range w.placed {
+		if current.widget == child {
+			current.place = config
+			return
+		}
+	}
+
+	// Append it.
+	w.placed = append(w.placed, &placedWidget{
 		widget: child,
 		place:  config,
 	})
@@ -89,6 +98,7 @@ func (w *Frame) computePlaced(e render.Engine) {
 			if row.place.Middle {
 				moveTo.Y = frameSize.H - (w.Size().H / 2) - (row.widget.Size().H / 2)
 			}
+
 			row.widget.MoveTo(moveTo)
 			row.widget.Compute(e)
 		}
