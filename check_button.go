@@ -61,6 +61,14 @@ func (w *CheckButton) Compute(e render.Engine) {
 		} else {
 			w.SetBorderStyle(BorderRaised)
 		}
+	} else if w.BoolVar != nil {
+		// Checkbutton, always re-assign the border style in case the caller
+		// has flipped the boolean behind our back.
+		if *w.BoolVar {
+			w.SetBorderStyle(BorderSunken)
+		} else {
+			w.SetBorderStyle(BorderRaised)
+		}
 	}
 	w.Button.Compute(e)
 }

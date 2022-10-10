@@ -1,5 +1,7 @@
 package ui
 
+import "errors"
+
 // Checkbox combines a CheckButton with a widget like a Label.
 type Checkbox struct {
 	Frame
@@ -58,6 +60,14 @@ func makeCheckbox(name string, boolVar *bool, stringVar *string, value string, c
 // Child returns the child widget.
 func (w *Checkbox) Child() Widget {
 	return w.child
+}
+
+// SetText conveniently sets the button text, for Label children only.
+func (w *Checkbox) SetText(text string) error {
+	if label, ok := w.child.(*Label); ok {
+		label.Text = text
+	}
+	return errors.New("child is not a Label widget")
 }
 
 // Pass event handlers on to descendents.
