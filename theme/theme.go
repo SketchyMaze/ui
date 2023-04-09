@@ -21,6 +21,7 @@ type Theme struct {
 	Window   *style.Window
 	Label    *style.Label
 	Button   *style.Button
+	ListBox  *style.ListBox
 	Tooltip  *style.Tooltip
 	TabFrame *style.Button
 }
@@ -30,6 +31,7 @@ var Default = Theme{
 	Name:     "Default",
 	Label:    &style.DefaultLabel,
 	Button:   &style.DefaultButton,
+	ListBox:  &style.DefaultListBox,
 	Tooltip:  &style.DefaultTooltip,
 	TabFrame: &style.DefaultButton,
 }

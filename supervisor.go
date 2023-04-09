@@ -23,6 +23,7 @@ const (
 	KeyDown
 	KeyUp
 	KeyPress
+	Scroll
 
 	// Drag/drop event handlers.
 	DragStop // if a widget is being dragged and the drag is done
@@ -60,6 +61,23 @@ type EventData struct {
 	// Clicked is true if the primary mouse button is down during
 	// a MouseMove
 	Clicked bool
+
+	// A Value given e.g. from a ListBox click.
+	Value interface{}
+
+	// Scroll event values.
+	ScrollFraction float64 // between 0 and 1 for the scrollbar percentage
+
+	// Number of units that have scrolled. It is up to the caller to decide
+	// what units mean (e.g. characters, lines of text, pixels, etc.)
+	// The scrollbar fraction times your Step value provides the units.
+	ScrollUnits int
+
+	// Number of pages that have scrolled. It is up to the caller to decide
+	// what a page is. It would typically be a number of your Units slightly
+	// less than what fits in the list so the user sees some overlap as
+	// they scroll quickly by pages.
+	ScrollPages int // TODO: not implemented
 }
 
 // RelativePoint returns the ed.Point adjusted to be relative to the widget on screen.
@@ -256,20 +274,22 @@ func (s *Supervisor) Hovering(cursor render.Point) (hovering, outside []WidgetSl
 // cursor, transmit mouse events to the widgets.
 //
 // This function has two use cases:
-// - In runWindowEvents where we run events for the top-most focused window of
-//   the window manager.
-// - In Supervisor.Loop() for the widgets that are NOT owned by a managed
-//   window, so that these widgets always get events.
+//   - In runWindowEvents where we run events for the top-most focused window of
+//     the window manager.
+//   - In Supervisor.Loop() for the widgets that are NOT owned by a managed
+//     window, so that these widgets always get events.
 //
 // Parameters:
-//    XY (Point): mouse cursor position as calculated in Loop()
-//    ev, hovering, outside: values from Loop(), self explanatory.
-//    behavior: indicates how this method is being used.
+//
+//	XY (Point): mouse cursor position as calculated in Loop()
+//	ev, hovering, outside: values from Loop(), self explanatory.
+//	behavior: indicates how this method is being used.
 //
 // behavior options:
-//    0: widgets NOT part of a managed window. On this pass, if a widget IS
-//       a part of a window, it gets no events triggered.
-//    1: widgets are part of the active focused window.
+//
+//	0: widgets NOT part of a managed window. On this pass, if a widget IS
+//	   a part of a window, it gets no events triggered.
+//	1: widgets are part of the active focused window.
 func (s *Supervisor) runWidgetEvents(XY render.Point, ev *event.State,
 	hovering, outside []WidgetSlot, toFocusedWindow bool) (bool, error) {
 	// Do we run any events?
@@ -587,11 +607,11 @@ UI which you had called Present() on prior.
 
 The current draw order of the Supervisor is as follows:
 
-1. Managed windows are drawn in the order of most recently focused on top.
-2. Pop-up modals such as Menus are drawn. Modals have an "event grab" and all
-   mouse events go to them, or clicking outside of them dismisses the modals.
-3. DrawOnTop widgets such as Tooltips that should always be drawn "last" so as
-   not to be overwritten by neighboring widgets.
+ 1. Managed windows are drawn in the order of most recently focused on top.
+ 2. Pop-up modals such as Menus are drawn. Modals have an "event grab" and all
+    mouse events go to them, or clicking outside of them dismisses the modals.
+ 3. DrawOnTop widgets such as Tooltips that should always be drawn "last" so as
+    not to be overwritten by neighboring widgets.
 */
 func (s *Supervisor) DrawOnTop(w Widget) {
 	s.onTop = append(s.onTop, w)

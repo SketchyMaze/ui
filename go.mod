@@ -3,7 +3,7 @@ module git.kirsle.net/go/ui
 go 1.16
 
 require (
-	git.kirsle.net/go/render v0.0.0-20211231003948-9e640ab5c3da
-	github.com/veandco/go-sdl2 v0.4.8 // indirect
-	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
+	git.kirsle.net/go/render v0.0.0-20220505053906-129a24300dfa
+	github.com/veandco/go-sdl2 v0.4.33 // indirect
+	golang.org/x/image v0.6.0
 )

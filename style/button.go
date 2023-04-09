@@ -30,6 +30,18 @@ var (
 		BorderSize:      2,
 	}
 
+	DefaultListBox = ListBox{
+		Background:         render.White,
+		Foreground:         render.Black,
+		HoverBackground:    render.Cyan,
+		HoverForeground:    render.Orange,
+		SelectedBackground: render.Blue,
+		SelectedForeground: render.White,
+		BorderStyle:        BorderSunken,
+		// BorderColor: render.RGBA(200, 200, 200, 255),
+		BorderSize: 2,
+	}
+
 	DefaultTooltip = Tooltip{
 		Background: render.RGBA(0, 0, 0, 230),
 		Foreground: render.White,
@@ -68,4 +80,16 @@ type Button struct {
 type Tooltip struct {
 	Background render.Color
 	Foreground render.Color
+}
+
+// ListBox style configuration.
+type ListBox struct {
+	Background         render.Color
+	Foreground         render.Color // Labels only
+	SelectedBackground render.Color
+	SelectedForeground render.Color
+	HoverBackground    render.Color
+	HoverForeground    render.Color
+	BorderStyle        BorderStyle
+	BorderSize         int
 }
