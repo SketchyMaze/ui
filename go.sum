@@ -1,14 +1,8 @@
-git.kirsle.net/go/render v0.0.0-20210104010442-b4a1979a8ba1 h1:wGQLjBnWvqx7rU43yFG8ow4rnYqUMUwqorEkxdPaJ6Q=
-git.kirsle.net/go/render v0.0.0-20210104010442-b4a1979a8ba1/go.mod h1:ss7pvZbGWrMaDuZwyUTjV9+T0AJwAkxZZHwMFsvHrkk=
-git.kirsle.net/go/render v0.0.0-20210614025954-d77f5056b782 h1:Ko+NvZxmJbW+M1dA2jCSnV6qSpkLoZASramE6ltlf/s=
-git.kirsle.net/go/render v0.0.0-20210614025954-d77f5056b782/go.mod h1:ss7pvZbGWrMaDuZwyUTjV9+T0AJwAkxZZHwMFsvHrkk=
 git.kirsle.net/go/render v0.0.0-20211231003948-9e640ab5c3da h1:wbeh/hHiwmXqf/3VPrbE/PADTcT1niQWhxxK81Ize3o=
 git.kirsle.net/go/render v0.0.0-20211231003948-9e640ab5c3da/go.mod h1:ss7pvZbGWrMaDuZwyUTjV9+T0AJwAkxZZHwMFsvHrkk=
 git.kirsle.net/go/render v0.0.0-20220505053906-129a24300dfa h1:Oa99SXkmFGnUNy+toPMQyW/eYotN1nZ9BWAThQ/huiM=
 git.kirsle.net/go/render v0.0.0-20220505053906-129a24300dfa/go.mod h1:ss7pvZbGWrMaDuZwyUTjV9+T0AJwAkxZZHwMFsvHrkk=
 github.com/veandco/go-sdl2 v0.4.1/go.mod h1:FB+kTpX9YTE+urhYiClnRzpOXbiWgaU3+5F2AB78DPg=
-github.com/veandco/go-sdl2 v0.4.7 h1:VfpCM+LfEGDbHdByglCo2bcBsevjFvzl8W0f6VLNitg=
-github.com/veandco/go-sdl2 v0.4.7/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/veandco/go-sdl2 v0.4.8 h1:A26KeX6R1CGt/BQGEov6oxYmVGMMEWDVqTvK1tXvahE=
 github.com/veandco/go-sdl2 v0.4.8/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=
 github.com/veandco/go-sdl2 v0.4.33 h1:cxQ0OdUBEByHxvCyrGxy9F8WpL38Ya6hzV4n27QL84M=
