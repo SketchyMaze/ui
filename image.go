@@ -81,6 +81,19 @@ func ImageFromFile(filename string) (*Image, error) {
 	}, nil
 }
 
+// ReplaceFromImage replaces the image with a new image.
+func (w *Image) ReplaceFromImage(im image.Image) error {
+	// Free the old texture.
+	if w.texture != nil {
+		if err := w.texture.Free(); err != nil {
+			return err
+		}
+		w.texture = nil
+	}
+	w.Image = im
+	return nil
+}
+
 // OpenImage initializes an Image with a given file name.
 //
 // The file extension is important and should be a supported ImageType.
@@ -187,4 +200,12 @@ func (w *Image) Present(e render.Engine, p render.Point) {
 
 	// Call the BaseWidget Present in case we have subscribers.
 	w.BaseWidget.Present(e, p)
+}
+
+// Destroy cleans up the image and releases textures.
+func (w *Image) Destroy() {
+	if w.texture != nil {
+		w.texture.Free()
+		w.texture = nil
+	}
 }

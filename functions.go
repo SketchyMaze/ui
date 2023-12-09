@@ -12,6 +12,7 @@ func AbsolutePosition(w Widget) render.Point {
 	var (
 		node = w
 		ok   bool
+		pt   render.Point
 	)
 
 	for {
@@ -20,7 +21,9 @@ func AbsolutePosition(w Widget) render.Point {
 			return abs
 		}
 
-		abs.Add(node.Point())
+		pt = node.Point()
+		pt.Add(render.NewPoint(node.BorderSize(), node.BorderSize()))
+		abs.Add(pt)
 	}
 }
 

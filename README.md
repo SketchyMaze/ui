@@ -100,13 +100,15 @@ most complex.
 
 **Fully implemented widgets:**
 
+In order of simplicity:
+
 * [x] **BaseWidget**: the base class of all Widgets.
   * The `Widget` interface describes the functions common to all Widgets,
     such as SetBackground, Configure, MoveTo, Resize, and so on.
   * BaseWidget provides sane default implementations for all the methods
     required by the Widget interface. Most Widgets inherit from
-    the BaseWidget.
-* [x] **Frame**: a layout wrapper for other widgets.
+    the BaseWidget and override what they need.
+* [x] **Frame**: a layout wrapper for child widgets.
   * Pack() lets you add child widgets to the Frame, aligned against one side
     or another, and ability to expand widgets to take up remaining space in
     their part of the Frame.
@@ -153,6 +155,10 @@ most complex.
   a modal pop-up by the MenuButton and MenuBar. [Example](eg/menus)
 * [x] **SelectBox**: a kind of MenuButton that lets the user choose a
   value from a list of possible values.
+* [x] **Scrollbar**: a Frame including a trough, scroll buttons and a
+  draggable slider.
+* [x] **ListBox**: a multi-line select box with a ScrollBar that can hold arbitrary
+  child widgets (usually Labels which have a shortcut function for).
 
 Some useful helper widgets:
 
@@ -161,16 +167,11 @@ Some useful helper widgets:
   custom hexadecimal value by hand (needs assistance from your program).
   [Example](eg/colorpicker)
 
-**Work in progress widgets:**
-
-* [ ] **Scrollbar**: a Frame including a trough, scroll buttons and a
-  draggable slider.
-
-**Wish list for the longer-term future:**
+**Planned widgets:**
 
 * [ ] **TextBox:** an editable text field that the user can focus and type
   a value into.
-  * Would depend on the WindowManager to manage focus for the widgets.
+* [ ] **TextArea:** an editable multi-line text field with a scrollbar.
 
 ## Supervisor for Interaction
 
