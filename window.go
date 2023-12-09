@@ -412,5 +412,7 @@ func (w *Window) Present(e render.Engine, P render.Point) {
 
 // Destroy hides the window.
 func (w *Window) Destroy() {
-	w.Close()
+	if !w.Hidden() {
+		w.Close()
+	}
 }
